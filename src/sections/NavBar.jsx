@@ -6,7 +6,7 @@ const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <header className="w-full fixed inset-x-0 z-20 backdrop-blur-md bg-white/60  rounded-b-2xl">
-      <div className="flex justify-between p-2 items-center border-2 ">
+      <div className="flex justify-between p-2 sm:px-8 items-center">
         <div className="flex">
           <h1 className="text-blue-600 font-bold text-2xl">VEHICLE</h1>
           <h1 className="font-bold text-2xl">RENT</h1>

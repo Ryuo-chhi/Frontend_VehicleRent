@@ -11,7 +11,7 @@ export const featureCardData = [
   {
     id: 2,
     icon: LuBadgeCheck,
-    bgIcon: "#14AE5C",
+    bgIcon: "#66D25D",
     title: "Verify Fleet",
     description: "Every vehicle is inspected and certified.",
   },
