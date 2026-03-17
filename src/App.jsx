@@ -1,13 +1,11 @@
 import NavBar from "./sections/NavBar";
 import CarList from "./components/CarList";
-import FeatureCardList from "./components/FeatureCardList";
+import { Home } from "./pages/Home";
 
 const App = () => {
   return (
     <div className="mx-auto">
-        <NavBar />
-      <CarList />
-      <FeatureCardList />
+      <Home />
     </div>
   );
 };

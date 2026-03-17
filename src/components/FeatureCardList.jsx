@@ -3,7 +3,7 @@ import FeatureCard from "./FeatureCard.jsx";
 
 const FeatureCardList = () => {
   return (
-    <article className="flex flex-col gap-6">
+    <article className="grid grid-cols-1 gap-6 pt-10 sm:grid-cols-2 lg:grid-cols-3 mx-auto max-w-6xl px-4">
       {featureCardData.map((card) => (
         <FeatureCard
           key={card.id}
