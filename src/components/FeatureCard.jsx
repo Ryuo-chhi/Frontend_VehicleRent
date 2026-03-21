@@ -2,7 +2,7 @@ export const FeatureCard = ({ icon, bgIcon, title, description }) => {
   const Icon = icon;
 
   return (
-    <div className="bg-white min-h-50 w-full py-6 px-10 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer">
+    <div className="bg-white min-h-50 w-full py-6 px-10 border-gray-200 border-2 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer">
       <div
         className="w-9.5 h-9.5 flex items-center justify-center rounded-xl mb-4"
         style={{ backgroundColor: `${bgIcon}33` }}

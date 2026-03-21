@@ -1,5 +1,4 @@
-import NavBar from "./sections/NavBar";
-import CarList from "./components/CarList";
+
 import { Home } from "./pages/Home";
 
 const App = () => {
