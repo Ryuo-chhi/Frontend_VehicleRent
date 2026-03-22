@@ -3,7 +3,7 @@ import { Home } from "./pages/Home";
 
 import About from "./pages/About";
 
-import { Vehicles } from "./pages/Vehicle"; 
+ 
 
 
 const App = () => {
@@ -13,7 +13,7 @@ const App = () => {
 
       <About />
 
-      <Vehicles />
+      
 
     </div>
   );
