@@ -1,20 +1,38 @@
-import NavBar from '../sections/NavBar'
-import Hero from '../sections/Hero';
-import FeatureCardList from '../components/FeatureCardList';
-import Login from '../components/Login';
-import Form from '../components/form';
-
+import { useState } from "react";
+import NavBar from "../sections/NavBar";
+import Hero from "../sections/Hero";
+import FeatureCardList from "../components/FeatureCardList";
+import AuthPage from "../components/AuthPage";
 
 export const Home = () => {
+  const [authMode, setAuthMode] = useState(null); // 'login' | 'signup' | null
+  const [showAuth, setShowAuth] = useState(false);
+
+  const openLogin = () => {
+    setAuthMode("login");
+    setShowAuth(true);
+  };
+
+  const openSignup = () => {
+    setAuthMode("signup");
+    setShowAuth(true);
+  };
+
+  const closeAuth = () => {
+    setShowAuth(false);
+  };
+
   return (
-    <>
-      {/* <NavBar />
+    <div className=" relative">
+      <NavBar onLoginClick={openLogin} onSignupClick={openSignup} />
       <Hero />
-      <FeatureCardList /> */}
+      <FeatureCardList />
 
-      <Form />
-    </>
-  )
-}
+      {showAuth && (
+        <AuthPage key={authMode} mode={authMode} onClose={closeAuth} />
+      )}
+    </div>
+  );
+};
 
-export default Home
+export default Home;

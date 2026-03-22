@@ -14,7 +14,7 @@ import {
   validateFullName,
 } from "../utils/validators";
 
-const SignUp = () => {
+const Signup = ({ switchToLogin }) => {
   const [show, setShow] = useState(false);
   const [form, setForm] = useState({
     fullname: "",
@@ -59,12 +59,12 @@ const SignUp = () => {
   }
 
   return (
-    <article className="w-full h-3/4 sm:w-4/5 border-2 border-gray-400 rounded-xl flex flex-col justify-center items-center p-3 gap-5 transition-all duration-300">
+    <article className="w-full h-full md:w-1/2 flex flex-col justify-center items-center bg-white rounded-tr-2xl rounded-br-2xl p-3 sm:px-5 lg:px-8 xl:px-10 gap-5 transition-all duration-300">
       <div>
         <h2 className="text-center font-bold text-2xl my-2">Sign Up</h2>
         <p className="text-gray-400">Fill in your details to get started</p>
       </div>
-      <form onSubmit={handleSubmit} className="w-full flex flex-col gap-3">
+      <form onSubmit={handleSubmit} className="w-full flex flex-col gap-5">
         <div>
           <p>Full Name</p>
           <InputWithIcon
@@ -120,14 +120,17 @@ const SignUp = () => {
         <div className="text-center">
           <p>
             Already have an account?{" "}
-            <button className="text-blue-700 cursor-pointer hover:text-blue-800">
+            <button
+              onClick={switchToLogin}
+              className="text-blue-700 cursor-pointer hover:text-blue-800"
+            >
               {" "}
-              Log in
+              <a href="">Log in</a>
             </button>
           </p>
         </div>
-        <div className="flex flex-col gap-4 mt-2">
-          <div className="text-center flex justify-center items-center text-gray-500 gap-3">
+        <div className="flex flex-col gap-8 mt-2">
+          <div className="text-center flex justify-between items-center text-gray-500">
             <hr className="w-1/3" />
             <p>or continue with</p>
             <hr className="w-1/3" />
@@ -142,4 +145,4 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
+export default Signup;
