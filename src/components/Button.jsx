@@ -7,9 +7,9 @@ const Button = ({ label, variant, onClick }) => {
     learnMore:
       "bg-[#f5f6fa] text-[#414141] w-36 h-11.5 text-3.5 border-2 border-[#d9d9d9] hover:bg-[#eceef5] hover:border-[#bfc4d3] hover:-translate-y-0.5",
     sendMessage:
-      "bg-black text-white w-48 h-13 text-4 hover:bg-[#1f1f1f] hover:-translate-y-0.5 hover:shadow-[0px_8px_20px_0px_rgba(0,0,0,0.2)]",
+      "w-full bg-slate-900 hover:bg-blue-600 text-white font-black py-5 rounded-2xl active:scale-[0.98] shadow-xl shadow-slate-200 uppercase tracking-widest text-sm",
   };
-  
+
   return (
     <button
       onClick={onClick}
