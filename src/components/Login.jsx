@@ -50,7 +50,10 @@ const Login = ({ switchToSignup }) => {
     }
   }
   return (
-    <article className="w-full h-full md:w-1/2 flex flex-col justify-center items-center p-3 gap-8 sm:px-4 lg:px-8 xl:px-10  bg-white md:rounded-tr-2xl md:rounded-br-2xl rounded-2xl transition-all duration-300">
+    <article
+      className="w-full h-full md:w-1/2 flex flex-col justify-center items-center p-3 gap-8 sm:px-4 lg:px-8 xl:px-10  bg-white md:rounded-tr-2xl md:rounded-br-2xl md:rounded-tl-none md:rounded-bl-none
+ rounded-2xl transition-all duration-300"
+    >
       <div>
         <h2 className="text-center font-bold text-2xl my-2">Login</h2>
         <p className="text-gray-400">
@@ -103,7 +106,10 @@ const Login = ({ switchToSignup }) => {
         <div className="text-center">
           <p>
             Don't have an account?{" "}
-            <button onClick={switchToSignup} className="text-blue-700 cursor-pointer hover:text-blue-800">
+            <button
+              onClick={switchToSignup}
+              className="text-blue-700 cursor-pointer hover:text-blue-800"
+            >
               {" "}
               <a href="">Sign Up</a>
             </button>

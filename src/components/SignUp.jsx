@@ -59,7 +59,7 @@ const Signup = ({ switchToLogin }) => {
   }
 
   return (
-    <article className="w-full h-full md:w-1/2 flex flex-col justify-center items-center bg-white rounded-tr-2xl rounded-br-2xl p-3 sm:px-5 lg:px-8 xl:px-10 gap-5 transition-all duration-300">
+    <article className="w-full h-full md:w-1/2 flex flex-col justify-center items-center bg-white  rounded-2xl md:rounded-tr-2xl md:rounded-br-2xl md:rounded-tl-none md:rounded-bl-none rounded-tr-2xl rounded-br-2xl p-3 sm:px-5 lg:px-8 xl:px-10 gap-5 transition-all duration-300">
       <div>
         <h2 className="text-center font-bold text-2xl my-2">Sign Up</h2>
         <p className="text-gray-400">Fill in your details to get started</p>
