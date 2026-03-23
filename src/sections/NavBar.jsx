@@ -5,7 +5,7 @@ import Profile from "../components/Profile";
 const NavBar = ({ onLoginClick, onSignupClick }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
-    <header className="w-full fixed inset-x-0 z-20 backdrop-blur-md bg-white/60  rounded-b-2xl">
+    <header className="w-full fixed inset-x-0 z-20 backdrop-blur-md bg-white/60  rounded-b-2xl px-4">
       {/* desktop view */}
       <div className="flex justify-between p-2 sm:px-8 items-center">
         <div className="flex">

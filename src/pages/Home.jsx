@@ -32,11 +32,14 @@ export const Home = () => {
       </div>
       <Footer />
 
+
       {showAuth && (
         <AuthPage key={authMode} mode={authMode} onClose={closeAuth} />
       )}
     </div>
   );
 };
+
+ 
 
 export default Home;
