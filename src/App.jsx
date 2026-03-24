@@ -29,7 +29,7 @@ const App = () => {
   const renderPage = () => {
     switch (page) {
       case "home":
-        return <Home />;
+        return <Home setPage={setPage} />;
       case "vehicles":
         return <Vehicles />;
       case "about":

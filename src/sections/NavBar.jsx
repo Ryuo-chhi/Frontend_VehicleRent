@@ -29,13 +29,13 @@ const NavBar = ({ onLoginClick, onSignupClick, setPage }) => {
         <div className="hidden sm:flex items-center gap-2">
           <button
             onClick={onLoginClick}
-            className="px-3 py-1 rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-50"
+            className="px-3 py-1 rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-50 cursor-pointer"
           >
             Login
           </button>
           <button
             onClick={onSignupClick}
-            className="px-3 py-1 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+            className="px-3 py-1 rounded-lg bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
           >
             Signup
           </button>
@@ -61,7 +61,7 @@ const NavBar = ({ onLoginClick, onSignupClick, setPage }) => {
                 //this ensure and run only if onLoginClick is pass and it not undifined 
                 onLoginClick && onLoginClick();
               }}
-              className="flex-1 px-3 py-2 rounded-lg border border-blue-600 text-blue-600"
+              className="flex-1 px-3 py-2 rounded-lg border border-blue-600 text-blue-600 cursor-pointer"
             >
               Login
             </button>
@@ -71,7 +71,7 @@ const NavBar = ({ onLoginClick, onSignupClick, setPage }) => {
                 //this ensure and run only if onLoginClick is pass and it not undifined 
                 onSignupClick && onSignupClick();
               }}
-              className="flex-1 px-3 py-2 rounded-lg bg-blue-600 text-white"
+              className="flex-1 px-3 py-2 rounded-lg bg-blue-600 text-white cursor-pointer"
             >
               Signup
             </button>
