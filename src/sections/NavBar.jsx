@@ -2,8 +2,9 @@ import { useState } from "react";
 import { HiMenu, HiX } from "react-icons/hi";
 import Navigation from "../components/Navigation";
 import Profile from "../components/Profile";
-const NavBar = ({ onLoginClick, onSignupClick }) => {
+const NavBar = ({ onLoginClick, onSignupClick, setPage }) => {
   const [isOpen, setIsOpen] = useState(false);
+
   return (
     <header className="w-full fixed inset-x-0 z-20 backdrop-blur-md bg-white/60  rounded-b-2xl px-4">
       {/* desktop view */}
@@ -23,7 +24,7 @@ const NavBar = ({ onLoginClick, onSignupClick }) => {
           )}
         </button>
         <nav className="hidden sm:flex ">
-          <Navigation />
+          <Navigation setPage={setPage}/>
         </nav>
         <div className="hidden sm:flex items-center gap-2">
           <button
@@ -81,7 +82,7 @@ const NavBar = ({ onLoginClick, onSignupClick }) => {
           </article>
 
 
-          <Navigation />
+          <Navigation setPage={setPage} />
         </nav>
       </div>
     </header>

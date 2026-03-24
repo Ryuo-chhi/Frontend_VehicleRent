@@ -2,15 +2,11 @@ import React from "react";
 import ContactCard, { AvailableHour } from "../components/ContactCard";
 import InquiryForm from "../components/InquiryForm";
 import contactCardData, { popularVehicles } from "../data/contactCard";
-import NavBar from "../sections/NavBar";
-import Footer from "../sections/Footer";
 
 const Contact = () => {
   return (
     <div className="relative flex min-h-screen flex-col">
       <div className="flex-1">
-        <NavBar />
-
         <div className="max-w-7xl mx-auto px-4 pt-28 pb-20 w-full">
           <div className="text-center mb-20">
             <div className="inline-block px-4 py-1.5 mb-6 text-xs font-black tracking-widest text-blue-600 uppercase bg-blue-50 rounded-full">
@@ -41,8 +37,6 @@ const Contact = () => {
           </div>
         </div>
       </div>
-
-      <Footer />
     </div>
   );
 };
