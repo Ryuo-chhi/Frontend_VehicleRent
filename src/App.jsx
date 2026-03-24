@@ -5,6 +5,7 @@ import Footer from "./sections/Footer";
 import About from "./pages/About";
 import Vehicles from "./pages/Vehicles";
 import NavBar from "./sections/NavBar";
+import AuthPage from "./components/AuthPage";
 
 const App = () => {
   const [authMode, setAuthMode] = useState(null); // 'login' | 'signup' | null
