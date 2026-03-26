@@ -25,7 +25,14 @@ export const Hero = ({ setPage }) => {
             if (typeof setPage === "function") setPage("vehicles");
           }}
         />
-        <Button variant="learnMore" label="Learn More" />
+        <Button
+          variant="learnMore"
+          label="Learn More"
+          onClick={(e) => {
+            e.preventDefault();
+            if (typeof setPage === "function") setPage("about");
+          }}
+        />
       </div>
     </div>
   );

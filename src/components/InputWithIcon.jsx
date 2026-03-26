@@ -10,7 +10,7 @@ const InputWithIcon = ({ icon: Icon, type, name, placeholder, rightIcon, handleC
         </div>
       )}
       <input
-        className="h-14 w-full border-gray-200 border-2 outline-none rounded-xl pl-10 pr-3"
+        className="h-14 w-full border-gray-200 focus:border-blue-700 border-2 outline-none rounded-xl pl-10 pr-3"
         type={type}
         name={name}
         placeholder={placeholder}

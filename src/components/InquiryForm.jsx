@@ -67,7 +67,9 @@ const InquiryForm = ({ popularVehicles }) => {
           ></textarea>
         </div>
 
-        <Button variant="sendMessage" label="SEND MESSAGE" />
+        <Button variant="sendMessage" label="SEND MESSAGE" onClick={(e)=>{
+          e.preventDefault();
+        }} />
       </form>
     </div>
   );
