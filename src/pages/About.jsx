@@ -36,7 +36,7 @@ const About = () => {
 
       <section className="w-full max-w-5xl mt-14 mx-auto px-2 sm:px-0">
         <div className="text-center mb-6 w-full max-w-2xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">
+          <h2 className="text-2xl sm:text-3xl font-bold text-blue-600">
             Meet The Developers
           </h2>
           <p className="text-slate-500 mt-2 text-sm sm:text-base">

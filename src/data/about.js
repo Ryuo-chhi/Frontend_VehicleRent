@@ -12,25 +12,25 @@ export const aboutStats = [
 
 export const aboutDevelopers = [
   {
-    name: "Developer One",
+    name: "Tiek Chhunhour",
     initials: "D1",
     role: "Frontend Developer",
     focus: "UI layouts and reusable components",
   },
   {
-    name: "Developer Two",
+    name: "Thang Saoly",
     initials: "D2",
     role: "Frontend Developer",
     focus: "Responsive design and interactions",
   },
   {
-    name: "Developer Three",
+    name: "Yeat David",
     initials: "D3",
     role: "Frontend Developer",
     focus: "Form flows and validation logic",
   },
   {
-    name: "Developer Four",
+    name: "Noy Sokbolen",
     initials: "D4",
     role: "Frontend Developer",
     focus: "Performance and page structure",
