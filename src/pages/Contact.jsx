@@ -1,6 +1,6 @@
 import React from "react";
 import ContactCard, { AvailableHour } from "../components/ContactCard";
-import InquiryForm from "../components/InquiryForm";
+import ContactForm from "../components/ContactForm.jsx";
 import contactCardData, { popularVehicles } from "../data/contactCard";
 
 const Contact = () => {
@@ -33,7 +33,7 @@ const Contact = () => {
                 ),
               )}
             </div>
-            <InquiryForm popularVehicles={popularVehicles} />
+            <ContactForm popularVehicles={popularVehicles} />
           </div>
         </div>
       </div>

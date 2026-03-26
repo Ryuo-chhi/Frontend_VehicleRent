@@ -1,7 +1,7 @@
 import React from "react";
 import Button from "./Button";
 
-const InquiryForm = ({ popularVehicles }) => {
+const ContactForm = ({ popularVehicles }) => {
   return (
     <div className="lg:col-span-2 bg-white p-10 rounded-[2.5rem] shadow-2xl shadow-slate-200/50 border border-slate-100">
       <form className="space-y-8">
@@ -75,4 +75,4 @@ const InquiryForm = ({ popularVehicles }) => {
   );
 };
 
-export default InquiryForm;
+export default ContactForm;

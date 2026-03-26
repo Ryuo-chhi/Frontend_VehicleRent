@@ -1,7 +1,7 @@
 import React from "react";
 import { IoCloseOutline } from "react-icons/io5";
 
-function CarOverlay({ props, day, setDay, calculateTotal, onClose }) {
+function VehicleOverlay({ props, day, setDay, calculateTotal, onClose }) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
@@ -69,7 +69,7 @@ function CarOverlay({ props, day, setDay, calculateTotal, onClose }) {
             <div className="shrink-0">
               <p className="text-[9px] text-gray-400 font-bold tracking-widest uppercase">Estimated Total</p>
               <p 
-                className="text-2xl font-black text-gray-900">${calculateTotal()}
+                className="text-2xl font-black text-green-700">${calculateTotal()}
                 <span className="text-xs font-normal text-gray-400 ml-1">/{day}d</span>
              </p>
             </div>
@@ -108,4 +108,4 @@ function CarOverlay({ props, day, setDay, calculateTotal, onClose }) {
   );
 }
 
-export default CarOverlay;
+export default VehicleOverlay;

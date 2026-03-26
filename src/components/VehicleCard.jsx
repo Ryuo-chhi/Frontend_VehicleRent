@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import { GiCarKey } from "react-icons/gi";
-import CarOverlay from './CarOverlay';
+import VehicleOverlay from './VehicleOverlay.jsx';
 
-function CarCard({ props }) {
+function VehicleCard({ props }) {
   const [day, setDay] = useState(1);
   const [open, setOpen] = useState(false);
   const calculateTotal = () => props.price * day;
@@ -35,7 +35,7 @@ function CarCard({ props }) {
           {/* Price + inventory */}
           <div className="flex items-end justify-between">
             <div>
-              <p className="text-2xl font-black text-gray-900">${props.price}</p>
+              <p className="text-2xl font-black text-green-700">${props.price}</p>
               <p className="text-xs text-gray-400">per day</p>
             </div>
             <div className="flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full" style={{backgroundColor: props.color + '18', color: props.color}}>
@@ -48,7 +48,7 @@ function CarCard({ props }) {
 
       {/* Overlay */}
       {open && (
-        <CarOverlay 
+        <VehicleOverlay
           props={props}
           day={day}
           setDay={setDay}
@@ -60,4 +60,4 @@ function CarCard({ props }) {
   )
 }
 
-export default CarCard;
+export default VehicleCard;
