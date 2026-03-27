@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { HiMenu, HiX } from "react-icons/hi";
 import Navigation from "../components/Navigation";
-import Profile from "../components/Profile";
-const NavBar = ({ onLoginClick, onSignupClick, setPage }) => {
+const NavBar = ({ onLoginClick, onSignupClick, setPage, setIsNavOpen }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -14,7 +13,10 @@ const NavBar = ({ onLoginClick, onSignupClick, setPage }) => {
           <h1 className="font-bold text-2xl">RENT</h1>
         </div>
         <button
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => {
+            setIsOpen(!isOpen);
+            setIsNavOpen(!isOpen);
+          }}
           className="flex cursor-pointer focus:outline-none sm:hidden"
         >
           {isOpen ? (
@@ -24,7 +26,7 @@ const NavBar = ({ onLoginClick, onSignupClick, setPage }) => {
           )}
         </button>
         <nav className="hidden sm:flex ">
-          <Navigation setPage={setPage}/>
+          <Navigation setPage={setPage} />
         </nav>
         <div className="hidden sm:flex items-center gap-2">
           <button
@@ -47,9 +49,7 @@ const NavBar = ({ onLoginClick, onSignupClick, setPage }) => {
 
       <div
         className={`w-screen flex justify-center pr-5 overflow-hidden sm:hidden h-fit transition-all duration-500 ${
-          isOpen
-            ? "max-h-screen opacity-100 "
-            : "max-h-0 opacity-0 "
+          isOpen ? "max-h-screen opacity-100 " : "max-h-0 opacity-0 "
         }`}
         aria-hidden={!isOpen}
       >
@@ -58,7 +58,8 @@ const NavBar = ({ onLoginClick, onSignupClick, setPage }) => {
             <button
               onClick={() => {
                 setIsOpen(false);
-                //this ensure and run only if onLoginClick is pass and it not undifined 
+                setIsNavOpen(false);
+                //this ensure and run only if onLoginClick is pass and it not undifined
                 onLoginClick && onLoginClick();
               }}
               className="flex-1 px-3 py-2 rounded-lg border border-blue-600 text-blue-600 cursor-pointer"
@@ -68,7 +69,8 @@ const NavBar = ({ onLoginClick, onSignupClick, setPage }) => {
             <button
               onClick={() => {
                 setIsOpen(false);
-                //this ensure and run only if onLoginClick is pass and it not undifined 
+                setIsNavOpen(false);
+                //this ensure and run only if onLoginClick is pass and it not undifined
                 onSignupClick && onSignupClick();
               }}
               className="flex-1 px-3 py-2 rounded-lg bg-blue-600 text-white cursor-pointer"
@@ -76,11 +78,10 @@ const NavBar = ({ onLoginClick, onSignupClick, setPage }) => {
               Signup
             </button>
           </div>
-          
+
           <article className="w-full border-b-2 border-gray-400 ">
             {/* <Profile /> */}
           </article>
-
 
           <Navigation setPage={setPage} />
         </nav>

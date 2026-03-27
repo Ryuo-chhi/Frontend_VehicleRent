@@ -2,7 +2,7 @@ export const SectionLabel = ({ icon, bgIcon, title, available }) => {
   const Icon = icon;
 
   return (
-    <div className="flex items-center justify-between mt-14">
+    <div className="flex items-center justify-between">
       
       <div className="flex items-center gap-3">
         <div

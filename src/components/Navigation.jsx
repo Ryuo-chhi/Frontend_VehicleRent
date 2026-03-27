@@ -1,6 +1,6 @@
 const Navigation = ({ setPage }) => {
   return (
-    <ul className="flex flex-col w-full sm:flex-row sm:gap-6  gap-2 text-start font-bold ">
+    <ul className="flex flex-col w-full sm:flex-row sm:gap-6  gap-2 text-start font-semibold ">
       <li className="hover:bg-gray-200/30 w-full transition-colors duration-75 cursor-pointer">
         <a
           onClick={(e) => {

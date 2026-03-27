@@ -11,6 +11,7 @@ const App = () => {
   const [authMode, setAuthMode] = useState(null); // 'login' | 'signup' | null
   const [showAuth, setShowAuth] = useState(false);
   const [page, setPage] = useState("home");
+  const [isNavOpen, setIsNavOpen] = useState(false);
 
   const openLogin = () => {
     setAuthMode("login");
@@ -31,7 +32,7 @@ const App = () => {
       case "home":
         return <Home setPage={setPage} />;
       case "vehicles":
-        return <Vehicles />;
+        return <Vehicles isNavOpen={isNavOpen} />;
       case "about":
         return <About />;
       case "contact":
@@ -47,6 +48,7 @@ const App = () => {
         onLoginClick={openLogin}
         onSignupClick={openSignup}
         setPage={setPage}
+        setIsNavOpen={setIsNavOpen}
       />
 
       {renderPage()}
