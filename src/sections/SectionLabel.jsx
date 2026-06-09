@@ -17,9 +17,9 @@ export const SectionLabel = ({ icon, bgIcon, title, available }) => {
         </h3>
       </div>
 
-      {available && (
-        <p className="text-sm sm:text-base md:text-lg text-gray-400 font-bold tracking-wide">
-          {available} AVAILABLE
+      {available !== undefined && (
+        <p className={`text-sm sm:text-base md:text-lg font-bold tracking-wide ${available > 0 ? "text-gray-400" : "text-red-400"}`}>
+          {available > 0 ? `${available} AVAILABLE` : "UNAVAILABLE"}
         </p>
       )}
 

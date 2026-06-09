@@ -1,45 +1,54 @@
-const Navigation = ({ setPage }) => {
+import { NavLink } from "react-router-dom";
+
+const Navigation = () => {
+  const role = localStorage.getItem("role");
+  const isStaff = role === "MANAGER" || role === "REGULAR";
+
   return (
-    <ul className="flex flex-col w-full sm:flex-row sm:gap-6  gap-2 text-start font-semibold ">
-      <li className="hover:bg-gray-200/30 w-full transition-colors duration-75 cursor-pointer">
-        <a
-          onClick={(e) => {
-            e.preventDefault();
-            if (typeof setPage === "function") setPage("home");
-          }}
+    <ul className="flex flex-col w-full sm:w-auto sm:flex-row sm:gap-6 gap-2 text-center sm:text-start font-semibold items-center justify-center">
+      <li className="hover:bg-gray-200/30 w-full sm:w-auto transition-colors duration-75 cursor-pointer px-2 py-1 rounded-lg">
+        <NavLink 
+          to="/" 
+          className={({ isActive }) => isActive ? "text-blue-600" : ""}
         >
           Home
-        </a>
+        </NavLink>
       </li>
-      <li className="hover:bg-gray-200/30 w-full transition-colors duration-75 cursor-pointer">
-        <a
-          onClick={(e) => {
-            e.preventDefault();
-            if (typeof setPage === "function") setPage("vehicles");
-          }}
+      <li className="hover:bg-gray-200/30 w-full sm:w-auto transition-colors duration-75 cursor-pointer px-2 py-1 rounded-lg">
+        <NavLink 
+          to="/vehicles"
+          className={({ isActive }) => isActive ? "text-blue-600" : ""}
         >
           Vehicles
-        </a>
+        </NavLink>
       </li>
-      <li className="hover:bg-gray-200/30 w-full transition-colors duration-75 cursor-pointer">
-        <a
-          onClick={(e) => {
-            e.preventDefault();
-            if (typeof setPage === "function") setPage("about");
-          }}
+
+      {isStaff && (
+        <li className="hover:bg-gray-200/30 w-full sm:w-auto transition-colors duration-75 cursor-pointer px-2 py-1 rounded-lg">
+          <NavLink 
+            to="/dashboard"
+            className={({ isActive }) => isActive ? "text-blue-600" : "text-blue-600"}
+          >
+            Dashboard
+          </NavLink>
+        </li>
+      )}
+      
+      <li className="hover:bg-gray-200/30 w-full sm:w-auto transition-colors duration-75 cursor-pointer px-2 py-1 rounded-lg">
+        <NavLink 
+          to="/about"
+          className={({ isActive }) => isActive ? "text-blue-600" : ""}
         >
           About
-        </a>
+        </NavLink>
       </li>
-      <li className="hover:bg-gray-200/30 w-full transition-colors duration-75 cursor-pointer">
-        <a
-          onClick={(e) => {
-            e.preventDefault();
-            if (typeof setPage === "function") setPage("contact");
-          }}
+      <li className="hover:bg-gray-200/30 w-full sm:w-auto transition-colors duration-75 cursor-pointer px-2 py-1 rounded-lg">
+        <NavLink 
+          to="/contact"
+          className={({ isActive }) => isActive ? "text-blue-600" : ""}
         >
           Contact
-        </a>
+        </NavLink>
       </li>
     </ul>
   );

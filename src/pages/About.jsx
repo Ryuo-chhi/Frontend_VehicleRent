@@ -4,7 +4,7 @@ import { aboutDevelopers, aboutIntro, aboutStats } from "../data/about";
 
 const About = () => {
   return (
-    <div className="min-h-screen flex flex-col items-center px-4 py-10 pt-24">
+    <div className="flex flex-col items-center px-4 py-10 pt-24">
       <div className="flex flex-col md:flex-row items-center justify-center md:gap-3 text-center">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-blue-600 drop-shadow-md">
           About
@@ -18,9 +18,9 @@ const About = () => {
       </div>
       {/* Card */}
       <div className="bg-white rounded-3xl shadow-xl mt-8 max-w-2xl w-full p-6 sm:p-8 text-center">
-        {aboutIntro.map((paragraph) => (
+        {aboutIntro.map((paragraph, index) => (
           <p
-            key={paragraph}
+            key={index}
             className="text-gray-600 leading-relaxed mb-4 text-sm sm:text-base"
           >
             {paragraph}

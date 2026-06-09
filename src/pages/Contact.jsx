@@ -5,7 +5,7 @@ import contactCardData, { popularVehicles } from "../data/contactCard";
 
 const Contact = () => {
   return (
-    <div className="relative flex min-h-screen flex-col">
+    <div className="relative flex flex-col">
       <div className="flex-1">
         <div className="max-w-7xl mx-auto px-4 pt-28 pb-20 w-full">
           <div className="text-center mb-20">

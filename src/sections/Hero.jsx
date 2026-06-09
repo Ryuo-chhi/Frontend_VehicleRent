@@ -1,7 +1,10 @@
 import React from "react";
 import Button from "../components/Button";
+import { useNavigate } from "react-router-dom";
 
-export const Hero = ({ setPage }) => {
+export const Hero = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="pt-25 flex flex-col items-center justify-center">
       <div className="text-4xl font-bold ">
@@ -22,7 +25,7 @@ export const Hero = ({ setPage }) => {
           label="Browse Vehicles"
           onClick={(e) => {
             e.preventDefault();
-            if (typeof setPage === "function") setPage("vehicles");
+            navigate("/vehicles");
           }}
         />
         <Button
@@ -30,7 +33,7 @@ export const Hero = ({ setPage }) => {
           label="Learn More"
           onClick={(e) => {
             e.preventDefault();
-            if (typeof setPage === "function") setPage("about");
+            navigate("/about");
           }}
         />
       </div>

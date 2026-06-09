@@ -1,11 +1,11 @@
 import Hero from "../sections/Hero";
 import FeatureCardList from "../components/FeatureCardList";
 
-export const Home = ({setPage}) => {
+export const Home = () => {
   return (
-    <div className="relative flex min-h-screen flex-col">
+    <div className="relative flex flex-col">
       <div className="flex-1">
-        <Hero setPage={setPage} />
+        <Hero />
         <FeatureCardList />
       </div>
     </div>

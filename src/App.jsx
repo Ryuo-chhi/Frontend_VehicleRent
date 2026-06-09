@@ -1,16 +1,20 @@
 import { useState } from "react";
-import Contact from "./pages/Contact";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 import Home from "./pages/Home";
-import Footer from "./sections/Footer";
-import About from "./pages/About";
 import Vehicles from "./pages/Vehicles";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import Dashboard from "./pages/Dashboard";
 import NavBar from "./sections/NavBar";
+import Footer from "./sections/Footer";
 import AuthPage from "./components/AuthPage";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const App = () => {
   const [authMode, setAuthMode] = useState(null); // 'login' | 'signup' | null
   const [showAuth, setShowAuth] = useState(false);
-  const [page, setPage] = useState("home");
   const [isNavOpen, setIsNavOpen] = useState(false);
 
   const openLogin = () => {
@@ -27,37 +31,43 @@ const App = () => {
     setShowAuth(false);
   };
 
-  const renderPage = () => {
-    switch (page) {
-      case "home":
-        return <Home setPage={setPage} />;
-      case "vehicles":
-        return <Vehicles isNavOpen={isNavOpen} />;
-      case "about":
-        return <About />;
-      case "contact":
-        return <Contact />;
-      default:
-        return <Home />;
-    }
-  };
-
   return (
-    <div>
-      <NavBar
-        onLoginClick={openLogin}
-        onSignupClick={openSignup}
-        setPage={setPage}
-        setIsNavOpen={setIsNavOpen}
-      />
+    <BrowserRouter>
+      <AuthProvider>
+        <div className="flex flex-col min-h-screen">
+          <NavBar
+            onLoginClick={openLogin}
+            onSignupClick={openSignup}
+            setIsNavOpen={setIsNavOpen}
+          />
 
-      {renderPage()}
+          <div className="flex-1">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/vehicles" element={<Vehicles isNavOpen={isNavOpen} />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route 
+                path="/dashboard" 
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </div>
 
-      <Footer />
-      {showAuth && (
-        <AuthPage key={authMode} mode={authMode} onClose={closeAuth} />
-      )}
-    </div>
+          <Footer />
+
+          {showAuth && (
+            <AuthPage key={authMode} mode={authMode} onClose={closeAuth} />
+          )}
+          <Toaster position="top-center" />
+        </div>
+      </AuthProvider>
+    </BrowserRouter>
   );
 };
 
