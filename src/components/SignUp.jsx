@@ -13,8 +13,11 @@ import {
   validatePassword,
   validateFullName,
 } from "../utils/validators";
+import authService from "../services/authService";
+import { useAuth } from "../context/AuthContext";
 
-const Signup = ({ switchToLogin }) => {
+const Signup = ({ switchToLogin, onClose }) => {
+  const { login } = useAuth();
   const [show, setShow] = useState(false);
   const [form, setForm] = useState({
     fullname: "",
@@ -23,6 +26,20 @@ const Signup = ({ switchToLogin }) => {
   });
 
   const [errors, setErrors] = useState({});
+  const [apiError, setApiError] = useState("");
+
+  const getStrength = (pwd) => {
+    let score = 0;
+    if (pwd.length >= 8) score += 1;
+    if (/[A-Z]/.test(pwd)) score += 1;
+    if (/[a-z]/.test(pwd)) score += 1;
+    if (/[\d\W_]/.test(pwd)) score += 1;
+    return score;
+  };
+
+  const strengthScore = getStrength(form.password);
+  const strengthColors = ["bg-gray-200", "bg-red-500", "bg-orange-500", "bg-yellow-500", "bg-green-500"];
+  const strengthLabels = ["", "Weak", "Fair", "Good", "Strong"];
 
   //handle input change
   function handleChange(e) {
@@ -30,7 +47,6 @@ const Signup = ({ switchToLogin }) => {
       ...prevForm,
       [e.target.name]: e.target.value,
     }));
-    console.log(e.target.name + " " + e.target.value);
   }
 
   //validation
@@ -48,25 +64,46 @@ const Signup = ({ switchToLogin }) => {
     return newErrors;
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
+    setApiError("");
     const validationErrors = validate();
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length === 0) {
-      console.log("Sign up successfully", form);
+      try {
+        const customerData = {
+          customerName: form.fullname,
+          email: form.email,
+          customerIdNum: 'TBD', // Required by database validation
+          customerPhone: '000000000', // Required by database validation (9 digits)
+          password: form.password,
+          idCardPhoto: 'TBD',
+          driverLicensePhoto: 'TBD'
+        };
+
+        // 1. Register customer
+        await authService.customerRegister(customerData);
+        // 2. Auto-login customer
+        await login({ email: form.email, password: form.password }, 'customer');
+        onClose?.(); // Close the modal
+      } catch (error) {
+        setApiError(error.response?.data || error.message || "Registration failed");
+        console.log("Signup failed", error);
+      }
     }
   }
 
   return (
-    <article className="w-full h-full md:w-1/2 flex flex-col justify-center items-center bg-white  rounded-2xl md:rounded-tr-2xl md:rounded-br-2xl md:rounded-tl-none md:rounded-bl-none rounded-tr-2xl rounded-br-2xl p-3 sm:px-5 lg:px-8 xl:px-10 gap-5 transition-all duration-300">
-      <div>
-        <h2 className="text-center font-bold text-2xl my-2">Sign Up</h2>
-        <p className="text-gray-400">Fill in your details to get started</p>
+    <article className="w-full h-full md:w-1/2 flex flex-col justify-center items-center bg-white rounded-2xl md:rounded-tr-2xl md:rounded-br-2xl md:rounded-tl-none md:rounded-bl-none p-3 sm:px-5 lg:px-8 xl:px-10 gap-4 transition-all duration-300">
+      <div className="text-center">
+        <h2 className="font-bold text-2xl my-1">Sign Up</h2>
+        <p className="text-gray-400 text-sm">Fill in your details to get started</p>
       </div>
-      <form onSubmit={handleSubmit} className="w-full flex flex-col gap-5">
+
+      <form onSubmit={handleSubmit} className="w-full flex flex-col gap-3">
         <div>
-          <p>Full Name</p>
+          <p className="text-sm font-medium mb-1">Full Name</p>
           <InputWithIcon
             icon={HiOutlineUser}
             type="text"
@@ -74,12 +111,13 @@ const Signup = ({ switchToLogin }) => {
             placeholder="Your full name"
             handleChange={handleChange}
           />
+          {errors.fullname && (
+            <small className="text-red-500 block mt-0.5">{errors.fullname}</small>
+          )}
         </div>
-        {errors.fullname && (
-          <small className="text-red-500">{errors.fullname}</small>
-        )}
+        
         <div>
-          <p>Email Address</p>
+          <p className="text-sm font-medium mb-1">Email Address</p>
           <InputWithIcon
             icon={HiOutlineMail}
             type="email"
@@ -87,10 +125,11 @@ const Signup = ({ switchToLogin }) => {
             placeholder="you@email.com"
             handleChange={handleChange}
           />
+          {errors.email && <small className="text-red-500 block mt-0.5">{errors.email}</small>}
         </div>
-        {errors.email && <small className="text-red-500">{errors.email}</small>}
+
         <div>
-          <p>Password</p>
+          <p className="text-sm font-medium mb-1">Password</p>
           <InputWithIcon
             icon={HiOutlineLockClosed}
             type={show ? "text" : "password"}
@@ -103,12 +142,32 @@ const Signup = ({ switchToLogin }) => {
               </button>
             }
           />
+          {form.password.length > 0 && (
+            <div className="mt-2 space-y-1">
+              <div className="flex justify-between items-center text-xs">
+                <span className="font-medium text-gray-500">Password strength:</span>
+                <span className={`font-bold ${strengthScore === 4 ? "text-green-600" : "text-gray-700"}`}>
+                  {strengthLabels[strengthScore]}
+                </span>
+              </div>
+              <div className="flex gap-1 h-1.5">
+                {[1, 2, 3, 4].map(idx => (
+                  <div key={idx} className={`h-full flex-1 rounded-full ${idx <= strengthScore ? strengthColors[strengthScore] : "bg-gray-200"} transition-colors duration-300`}></div>
+                ))}
+              </div>
+            </div>
+          )}
+          {errors.password && (
+            <small className="text-red-500 block mt-0.5">{errors.password}</small>
+          )}
         </div>
-        {errors.password && (
-          <small className="text-red-500">{errors.password}</small>
-        )}
 
         <div className="mt-1">
+          {apiError && (
+            <div className="text-red-500 text-sm text-center font-medium my-2">
+              {apiError}
+            </div>
+          )}
           <button
             type="submit"
             className="w-full bg-blue-700 text-white p-3 outline-none rounded-xl cursor-pointer hover:bg-blue-600 transition-colors duration-300"
@@ -117,27 +176,27 @@ const Signup = ({ switchToLogin }) => {
           </button>
         </div>
 
-        <div className="text-center">
+        <div className="text-center text-sm">
           <p>
             Already have an account?{" "}
             <button
+              type="button"
               onClick={switchToLogin}
-              className="text-blue-700 cursor-pointer hover:text-blue-800"
+              className="text-blue-700 cursor-pointer hover:text-blue-800 font-bold"
             >
-              {" "}
-              <a href="">Log in</a>
+              Log in
             </button>
           </p>
         </div>
-        <div className="flex flex-col gap-8 mt-2">
-          <div className="text-center flex justify-between items-center text-gray-500">
+        <div className="flex flex-col gap-3 mt-1">
+          <div className="text-center flex justify-between items-center text-gray-500 text-xs">
             <hr className="w-1/3" />
             <p>or continue with</p>
             <hr className="w-1/3" />
           </div>
-          <div className="w-full flex justify-center items-center gap-3 border-gray-300 border-2 p-3 outline-none rounded-xl cursor-pointer hover:bg-gray-300 transition-colors duration-300">
+          <div className="w-full flex justify-center items-center gap-3 border-gray-300 border-2 p-2 outline-none rounded-xl cursor-pointer hover:bg-gray-100 transition-colors duration-300">
             <FcGoogle />
-            <button>Google</button>
+            <button type="button">Google</button>
           </div>
         </div>
       </form>

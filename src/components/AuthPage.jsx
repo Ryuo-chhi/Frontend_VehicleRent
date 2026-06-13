@@ -44,9 +44,9 @@ const AuthPage = ({ mode = "login", onClose }) => {
           </div>
         </article>
         {isLogin ? (
-          <Login switchToSignup={switchToSignup} />
+          <Login switchToSignup={switchToSignup} onClose={onClose} />
         ) : (
-          <Signup switchToLogin={switchToLogin} />
+          <Signup switchToLogin={switchToLogin} onClose={onClose} />
         )}
       </div>
     </div>
