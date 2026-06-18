@@ -1,23 +1,10 @@
-import Motor1 from '../../public/assets/images/Motor-1.jpg'
-import Motor2 from '../../public/assets/images/Motor-2.jpg'
-import Motor3 from '../../public/assets/images/Motor-3.jpg'
-import Motor4 from '../../public/assets/images/Motor-4.jpg'
-import Motor5 from '../../public/assets/images/Motor-5.jpg'
-import Motor6 from '../../public/assets/images/Motor-6.jpg'
-import Motor7 from '../../public/assets/images/Motor-7.jpg'
-import Motor8 from '../../public/assets/images/Motor-8.jpg'
-import Motor9 from '../../public/assets/images/Motor-9.jpeg'
-import Motor10 from '../../public/assets/images/Motor-10.jpg'
-import Motor11 from '../../public/assets/images/Motor-11.jpg'
-import Motor12 from '../../public/assets/images/Motor-12.jpg'
-
 export const MOTORCYCLE_DATA = [
   {
-    id: "Motor-1",
+    id: "Moto-1",
     category: "SCOOTER",
     fuelType: "GASOLINE",
     name: "Honda Dream 125",
-    seats: 2,  // rider + passenger
+    seats: 2,
     gearbox: "Manual",
     luggage: "1 Small Bag",
     support: "24/7 Support",
@@ -26,10 +13,10 @@ export const MOTORCYCLE_DATA = [
     tag: "Economy Scooters",
     tagCount: 8,
     color: "#6f42c1",
-    image: Motor1,
+    image: "/images/vehicles/Motor-1.jpg",
   },
   {
-    id: "Motor-2",
+    id: "Moto-2",
     category: "SCOOTER",
     fuelType: "GASOLINE",
     name: "Honda Scoopy",
@@ -42,10 +29,10 @@ export const MOTORCYCLE_DATA = [
     tag: "City Scooters",
     tagCount: 6,
     color: "#6f42c1",
-    image: Motor2,
+    image: "/images/vehicles/Motor-2.jpg",
   },
   {
-    id: "Motor-3",
+    id: "Moto-3",
     category: "MAXI SCOOTER",
     fuelType: "GASOLINE",
     name: "Yamaha XMAX 300",
@@ -58,10 +45,10 @@ export const MOTORCYCLE_DATA = [
     tag: "Premium Scooters",
     tagCount: 5,
     color: "#6f42c1",
-    image: Motor3,
+    image: "/images/vehicles/Motor-3.jpg",
   },
   {
-    id: "Motor-4",
+    id: "Moto-4",
     category: "ADVENTURE",
     fuelType: "GASOLINE",
     name: "BMW R1250GS",
@@ -74,10 +61,10 @@ export const MOTORCYCLE_DATA = [
     tag: "Adventure Bikes",
     tagCount: 7,
     color: "#6f42c1",
-    image: Motor4,
+    image: "/images/vehicles/Motor-4.jpg",
   },
   {
-    id: "Motor-5",
+    id: "Moto-5",
     category: "SCOOTER",
     fuelType: "GASOLINE",
     name: "Honda Click 125",
@@ -90,10 +77,10 @@ export const MOTORCYCLE_DATA = [
     tag: "Economy Scooters",
     tagCount: 10,
     color: "#6f42c1",
-    image: Motor5,
+    image: "/images/vehicles/Motor-5.jpg",
   },
   {
-    id: "Motor-6",
+    id: "Moto-6",
     category: "SCOOTER",
     fuelType: "GASOLINE",
     name: "Honda Airblade 125",
@@ -106,10 +93,10 @@ export const MOTORCYCLE_DATA = [
     tag: "City Scooters",
     tagCount: 6,
     color: "#6f42c1",
-    image: Motor6,
+    image: "/images/vehicles/Motor-6.jpg",
   },
   {
-    id: "Motor-7",
+    id: "Moto-7",
     category: "MANUAL",
     fuelType: "GASOLINE",
     name: "Honda FTR 250",
@@ -122,10 +109,10 @@ export const MOTORCYCLE_DATA = [
     tag: "Touring Bikes",
     tagCount: 5,
     color: "#6f42c1",
-    image: Motor7,
+    image: "/images/vehicles/Motor-7.jpg",
   },
   {
-    id: "Motor-8",
+    id: "Moto-8",
     category: "SCOOTER",
     fuelType: "GASOLINE",
     name: "Yamaha Lagenda 110",
@@ -138,10 +125,10 @@ export const MOTORCYCLE_DATA = [
     tag: "Budget Scooters",
     tagCount: 12,
     color: "#6f42c1",
-    image: Motor8,
+    image: "/images/vehicles/Motor-8.jpg",
   },
   {
-    id: "Motor-9",
+    id: "Moto-9",
     category: "ADV OFFROAD",
     fuelType: "GASOLINE",
     name: "Honda XR 250 Tornado",
@@ -154,10 +141,10 @@ export const MOTORCYCLE_DATA = [
     tag: "Adventure Bikes",
     tagCount: 4,
     color: "#6f42c1",
-    image: Motor9,
+    image: "/images/vehicles/Motor-9.jpeg",
   },
   {
-    id: "Motor-10",
+    id: "Moto-10",
     category: "SCOOTER",
     fuelType: "GASOLINE",
     name: "Honda PCX 150",
@@ -170,38 +157,38 @@ export const MOTORCYCLE_DATA = [
     tag: "Premium Scooters",
     tagCount: 5,
     color: "#6f42c1",
-    image: Motor10,
+    image: "/images/vehicles/Motor-10.jpg",
   },
   {
-  id: "Motor-11",
-  category: "SCOOTER",
-  fuelType: "GASOLINE", 
-  name: "Yamaha NMAX 155",
-  seats: 2,
-  gearbox: "Automatic",
-  luggage: "2 Medium Bags",
-  support: "24/7 Support",
-  price: 18,
-  available: 14,
-  tag: "Premium Scooters",
-  tagCount: 6,
-  color:  "#6f42c1",
-  image: Motor11,
-},
-{
-  id: "Motor-12",
-  category: "ADV OFFROAD",
-  fuelType: "GASOLINE",
-  name: "Kawasaki Versys 650",
-  seats: 2,
-  gearbox: "Manual",
-  luggage: "3 Medium Bags",
-  support: "24/7 Support",
-  price: 45,
-  available: 5,
-  tag: "Adventure Bikes",
-  tagCount: 5,
-  color: "#6f42c1",
-  image: Motor12,
-}
+    id: "Moto-11",
+    category: "SCOOTER",
+    fuelType: "GASOLINE",
+    name: "Yamaha NMAX 155",
+    seats: 2,
+    gearbox: "Automatic",
+    luggage: "2 Medium Bags",
+    support: "24/7 Support",
+    price: 18,
+    available: 14,
+    tag: "Premium Scooters",
+    tagCount: 6,
+    color: "#6f42c1",
+    image: "/images/vehicles/Motor-11.jpg",
+  },
+  {
+    id: "Moto-12",
+    category: "ADV OFFROAD",
+    fuelType: "GASOLINE",
+    name: "Kawasaki Versys 650",
+    seats: 2,
+    gearbox: "Manual",
+    luggage: "3 Medium Bags",
+    support: "24/7 Support",
+    price: 45,
+    available: 5,
+    tag: "Adventure Bikes",
+    tagCount: 5,
+    color: "#6f42c1",
+    image: "/images/vehicles/Motor-12.jpg",
+  }
 ];
