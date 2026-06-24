@@ -1,9 +1,23 @@
-import { HiOutlinePlus, HiOutlineCheckCircle, HiOutlineXCircle, HiOutlineTrash } from "react-icons/hi";
+import { HiOutlinePlus, HiOutlineCheckCircle, HiOutlineXCircle, HiOutlineTrash, HiOutlinePencil } from "react-icons/hi";
 
-const VehiclesTab = ({ vehicles, onAddVehicleClick, onDeleteVehicle, isLoading }) => (
+const VehiclesTab = ({ vehicles, onAddVehicleClick, onEditVehicle, onDeleteVehicle, isLoading }) => {
+  const totalVehicles = vehicles.length;
+  const availableVehicles = vehicles.filter(v => v.available).length;
+  const rentedVehicles = totalVehicles - availableVehicles;
+
+  return (
   <div>
     <div className="flex justify-between items-center mb-6">
-      <h2 className="text-xl font-bold text-gray-900">Manage Vehicles</h2>
+      <div className="flex flex-col gap-1">
+        <h2 className="text-xl font-bold text-gray-900">Manage Vehicles</h2>
+        {!isLoading && totalVehicles > 0 && (
+          <div className="flex gap-2 text-xs font-semibold mt-1">
+            <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded-md">Total: {totalVehicles}</span>
+            <span className="bg-green-100 text-green-700 px-2 py-1 rounded-md">Available: {availableVehicles}</span>
+            <span className="bg-red-100 text-red-700 px-2 py-1 rounded-md">Rented: {rentedVehicles}</span>
+          </div>
+        )}
+      </div>
       <button
         onClick={onAddVehicleClick}
         className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-blue-700 transition cursor-pointer"
@@ -60,7 +74,14 @@ const VehiclesTab = ({ vehicles, onAddVehicleClick, onDeleteVehicle, isLoading }
                     </span>
                   )}
                 </td>
-                <td className="py-3.5 px-4 text-right">
+                <td className="py-3.5 px-4 text-right flex justify-end gap-2">
+                  <button
+                    onClick={() => onEditVehicle(v)}
+                    className="text-blue-500 hover:text-blue-700 p-1 rounded transition cursor-pointer"
+                    title="Edit Vehicle"
+                  >
+                    <HiOutlinePencil size={18} />
+                  </button>
                   <button
                     onClick={() => onDeleteVehicle(v.vehicleId)}
                     className="text-red-500 hover:text-red-700 p-1 rounded transition cursor-pointer"
@@ -76,6 +97,7 @@ const VehiclesTab = ({ vehicles, onAddVehicleClick, onDeleteVehicle, isLoading }
       </table>
     </div>
   </div>
-);
+  );
+};
 
 export default VehiclesTab;

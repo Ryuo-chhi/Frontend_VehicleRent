@@ -1,6 +1,6 @@
-import { HiOutlineTrash } from "react-icons/hi";
+import { HiOutlineTrash, HiOutlinePencil } from "react-icons/hi";
 
-const CustomersTab = ({ customers, onDeleteCustomer, isLoading }) => (
+const CustomersTab = ({ customers, onEditCustomer, onDeleteCustomer, isLoading }) => (
   <div>
     <h2 className="text-xl font-bold text-gray-900 mb-6">Registered Customers</h2>
     <div className="overflow-x-auto">
@@ -30,7 +30,13 @@ const CustomersTab = ({ customers, onDeleteCustomer, isLoading }) => (
                 <td className="py-3.5 px-4 font-semibold text-gray-900">{c.customerName}</td>
                 <td className="py-3.5 px-4 font-mono">{c.customerPhone}</td>
                 <td className="py-3.5 px-4 font-mono">{c.customerIdNum}</td>
-                <td className="py-3.5 px-4 text-right">
+                <td className="py-3.5 px-4 text-right flex justify-end gap-2">
+                  <button
+                    onClick={() => onEditCustomer(c)}
+                    className="text-blue-500 hover:text-blue-700 p-1 rounded transition cursor-pointer"
+                  >
+                    <HiOutlinePencil size={18} />
+                  </button>
                   <button
                     onClick={() => onDeleteCustomer(c.customerId)}
                     className="text-red-500 hover:text-red-700 p-1 rounded transition cursor-pointer"

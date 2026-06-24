@@ -1,6 +1,6 @@
-import { HiOutlineCheckCircle, HiOutlineXCircle, HiOutlineTrash } from "react-icons/hi";
+import { HiOutlineCheckCircle, HiOutlineXCircle, HiOutlineTrash, HiOutlinePencil } from "react-icons/hi";
 
-const StaffTab = ({ staffList, onDeleteStaff, isLoading }) => (
+const StaffTab = ({ staffList, onEditStaff, onDeleteStaff, isLoading }) => (
   <div>
     <h2 className="text-xl font-bold text-gray-900 mb-6">Staff Management</h2>
     <div className="overflow-x-auto">
@@ -42,7 +42,13 @@ const StaffTab = ({ staffList, onDeleteStaff, isLoading }) => (
                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600"><HiOutlineXCircle /> Offline</span>
                   )}
                 </td>
-                <td className="py-3.5 px-4 text-right">
+                <td className="py-3.5 px-4 text-right flex justify-end gap-2">
+                  <button
+                    onClick={() => onEditStaff(s)}
+                    className="text-blue-500 hover:text-blue-700 p-1 rounded transition cursor-pointer"
+                  >
+                    <HiOutlinePencil size={18} />
+                  </button>
                   <button
                     onClick={() => onDeleteStaff(s.id)}
                     className="text-red-500 hover:text-red-700 p-1 rounded transition cursor-pointer"

@@ -1,10 +1,10 @@
-const VehicleModal = ({ show, onClose, form, setForm, onSubmit }) => {
+const VehicleModal = ({ show, onClose, form, setForm, onSubmit, isEdit = false }) => {
   if (!show) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 border border-gray-100 max-h-[90vh] overflow-y-auto">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Add New Vehicle</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-4">{isEdit ? "Edit Vehicle" : "Add New Vehicle"}</h2>
         
         <form onSubmit={onSubmit} className="flex flex-col gap-4">
           <div>
@@ -144,7 +144,7 @@ const VehicleModal = ({ show, onClose, form, setForm, onSubmit }) => {
               type="submit"
               className="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition cursor-pointer"
             >
-              Save Vehicle
+              {isEdit ? "Update Vehicle" : "Save Vehicle"}
             </button>
           </div>
         </form>

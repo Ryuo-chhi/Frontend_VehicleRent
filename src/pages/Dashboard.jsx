@@ -21,11 +21,12 @@ import MaintenanceTab from "../components/dashboard/MaintenanceTab";
 import PromotionsTab from "../components/dashboard/PromotionsTab";
 import StaffTab from "../components/dashboard/StaffTab";
 
-// Import modals
 import VehicleModal from "../components/modals/VehicleModal";
 import ReturnModal from "../components/modals/ReturnModal";
 import RentModal from "../components/modals/RentModal";
 import ConfirmModal from "../components/modals/ConfirmModal";
+import CustomerModal from "../components/modals/CustomerModal";
+import StaffModal from "../components/modals/StaffModal";
 
 const Dashboard = () => {
   const token = localStorage.getItem("token");
@@ -47,20 +48,25 @@ const Dashboard = () => {
   const [staffList, setStaffList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Forms and Modals State
+  const defaultVehicleForm = {
+    type: "Car", powerSource: "gasoline", vehicleClass: "sedan",
+    vehicleBrand: "", vehicleModel: "", rentalRatePerDay: "",
+    vehicleLicence: "", licencePlate: "", numberOfSeats: "4", helmetIncluded: false
+  };
   const [showVehicleModal, setShowVehicleModal] = useState(false);
-  const [vehicleForm, setVehicleForm] = useState({
-    type: "Car",
-    powerSource: "gasoline",
-    vehicleClass: "sedan",
-    vehicleBrand: "",
-    vehicleModel: "",
-    rentalRatePerDay: "",
-    vehicleLicence: "",
-    licencePlate: "",
-    numberOfSeats: "4",
-    helmetIncluded: false
-  });
+  const [vehicleForm, setVehicleForm] = useState(defaultVehicleForm);
+  const [isEditVehicle, setIsEditVehicle] = useState(false);
+  const [editVehicleId, setEditVehicleId] = useState(null);
+
+  const [showCustomerModal, setShowCustomerModal] = useState(false);
+  const [customerForm, setCustomerForm] = useState({});
+  const [isEditCustomer, setIsEditCustomer] = useState(false);
+  const [editCustomerId, setEditCustomerId] = useState(null);
+
+  const [showStaffModal, setShowStaffModal] = useState(false);
+  const [staffForm, setStaffForm] = useState({ role: "REGULAR", status: true });
+  const [isEditStaff, setIsEditStaff] = useState(false);
+  const [editStaffId, setEditStaffId] = useState(null);
 
   const [showReturnModal, setShowReturnModal] = useState(false);
   const [selectedRental, setSelectedRental] = useState(null);
@@ -155,11 +161,14 @@ const Dashboard = () => {
     }
   };
 
-  // Create Vehicle
-  const handleAddVehicle = async (e) => {
+  // Save Vehicle (Create or Edit)
+  const handleSaveVehicle = async (e) => {
     e.preventDefault();
     try {
-      const endpoint = vehicleForm.type === "Car" ? "/vehicles/cars" : "/vehicles/motos";
+      const endpoint = isEditVehicle 
+        ? `/vehicles/${vehicleForm.type === "Car" ? "cars" : "motos"}/${editVehicleId}`
+        : vehicleForm.type === "Car" ? "/vehicles/cars" : "/vehicles/motos";
+      
       const payload = {
         vehicleType: vehicleForm.type,
         powerSource: vehicleForm.powerSource,
@@ -174,19 +183,45 @@ const Dashboard = () => {
           : { helmetIncluded: vehicleForm.helmetIncluded })
       };
 
-      await api.post(endpoint, payload);
+      if (isEditVehicle) {
+        await api.put(endpoint, payload);
+      } else {
+        await api.post(endpoint, payload);
+      }
+      
       setShowVehicleModal(false);
-      setVehicleForm({
-        type: "Car", powerSource: "gasoline", vehicleClass: "sedan",
-        vehicleBrand: "", vehicleModel: "", rentalRatePerDay: "",
-        vehicleLicence: "", licencePlate: "", numberOfSeats: "4",
-        helmetIncluded: false
-      });
+      setVehicleForm(defaultVehicleForm);
       fetchData();
-      toast.success("Vehicle added successfully");
+      toast.success(isEditVehicle ? "Vehicle updated successfully" : "Vehicle added successfully");
     } catch (err) {
-      toast.error("Failed to add vehicle: " + err.message);
+      const serverMsg = err.response?.data?.message || err.response?.data?.error || err.message;
+      toast.error(`Failed to ${isEditVehicle ? 'update' : 'add'} vehicle: ` + serverMsg);
     }
+  };
+
+  const openAddVehicle = () => {
+    setIsEditVehicle(false);
+    setEditVehicleId(null);
+    setVehicleForm(defaultVehicleForm);
+    setShowVehicleModal(true);
+  };
+
+  const openEditVehicle = (vehicle) => {
+    setIsEditVehicle(true);
+    setEditVehicleId(vehicle.vehicleId);
+    setVehicleForm({
+      type: vehicle.vehicleType,
+      powerSource: vehicle.powerSource,
+      vehicleClass: vehicle.vehicleClass,
+      vehicleBrand: vehicle.vehicleBrand,
+      vehicleModel: vehicle.vehicleModel,
+      rentalRatePerDay: vehicle.rentalRatePerDay,
+      vehicleLicence: vehicle.licence,
+      licencePlate: vehicle.licencePlate,
+      numberOfSeats: vehicle.numberOfSeats || "4",
+      helmetIncluded: vehicle.helmetIncluded || false
+    });
+    setShowVehicleModal(true);
   };
 
   // Delete Vehicle
@@ -197,7 +232,8 @@ const Dashboard = () => {
         fetchData();
         toast.success("Vehicle deleted successfully");
       } catch (err) {
-        toast.error("Failed to delete vehicle: " + err.message);
+        const serverMsg = err.response?.data?.message || err.response?.data?.error || err.message;
+        toast.error("Failed to delete vehicle: " + serverMsg);
       }
     });
   };
@@ -223,7 +259,8 @@ const Dashboard = () => {
       fetchData();
       toast.success("Vehicle returned successfully");
     } catch (err) {
-      toast.error("Failed to return vehicle: " + err.message);
+      const serverMsg = err.response?.data?.message || err.response?.data?.error || err.message;
+      toast.error("Failed to return vehicle: " + serverMsg);
     }
   };
 
@@ -245,10 +282,88 @@ const Dashboard = () => {
       fetchData();
       toast.success("Rental created successfully");
     } catch (err) {
-      toast.error("Failed to create rental: " + err.message);
+      const serverMsg = err.response?.data?.message || err.response?.data?.error || err.message;
+      toast.error("Failed to create rental: " + serverMsg);
+    }
+  };
+  // Save Customer (Create or Edit)
+  const handleSaveCustomer = async (e) => {
+    e.preventDefault();
+    try {
+      if (isEditCustomer) {
+        await api.put(`/customers/${editCustomerId}`, customerForm);
+      } else {
+        await api.post('/customers/register', customerForm);
+      }
+      setShowCustomerModal(false);
+      setCustomerForm({});
+      fetchData();
+      toast.success(isEditCustomer ? "Customer updated successfully" : "Customer created successfully");
+    } catch (err) {
+      const serverMsg = err.response?.data?.message || err.response?.data?.error || err.message;
+      toast.error(`Failed to ${isEditCustomer ? 'update' : 'create'} customer: ` + serverMsg);
     }
   };
 
+  const openAddCustomer = () => {
+    setIsEditCustomer(false);
+    setEditCustomerId(null);
+    setCustomerForm({});
+    setShowCustomerModal(true);
+  };
+
+  const openEditCustomer = (customer) => {
+    setIsEditCustomer(true);
+    setEditCustomerId(customer.customerId);
+    setCustomerForm({
+      customerName: customer.customerName,
+      email: customer.email,
+      customerPhone: customer.customerPhone,
+      customerIdNum: customer.customerIdNum
+    });
+    setShowCustomerModal(true);
+  };
+  // Save Staff (Create or Edit)
+  const handleSaveStaff = async (e) => {
+    e.preventDefault();
+    try {
+      if (isEditStaff) {
+        await api.put(`/staffs/${editStaffId}`, staffForm);
+      } else {
+        const endpoint = staffForm.role === "MANAGER" ? "/staffs/managers" : "/staffs/register";
+        await api.post(endpoint, staffForm);
+      }
+      setShowStaffModal(false);
+      setStaffForm({ role: "REGULAR", status: true });
+      fetchData();
+      toast.success(isEditStaff ? "Staff updated successfully" : "Staff created successfully");
+    } catch (err) {
+      const serverMsg = err.response?.data?.message || err.response?.data?.error || err.message;
+      toast.error(`Failed to ${isEditStaff ? 'update' : 'create'} staff: ` + serverMsg);
+    }
+  };
+
+  const openAddStaff = () => {
+    setIsEditStaff(false);
+    setEditStaffId(null);
+    setStaffForm({ role: "REGULAR", status: true });
+    setShowStaffModal(true);
+  };
+
+  const openEditStaff = (staff) => {
+    setIsEditStaff(true);
+    setEditStaffId(staff.id);
+    setStaffForm({
+      name: staff.name,
+      username: staff.username,
+      salary: staff.salary,
+      role: staff.role,
+      status: staff.status,
+      workStation: staff.workStation
+    });
+    setShowStaffModal(true);
+  };
+  
   // Delete Customer
   const handleDeleteCustomer = async (id) => {
     requestConfirm("Are you sure you want to delete this customer?", async () => {
@@ -257,7 +372,8 @@ const Dashboard = () => {
         fetchData();
         toast.success("Customer deleted successfully");
       } catch (err) {
-        toast.error("Failed to delete customer: " + err.message);
+        const serverMsg = err.response?.data?.message || err.response?.data?.error || err.message;
+        toast.error("Failed to delete customer: " + serverMsg);
       }
     });
   };
@@ -270,7 +386,8 @@ const Dashboard = () => {
         fetchData();
         toast.success("Staff member deleted successfully");
       } catch (err) {
-        toast.error("Failed to delete staff: " + err.message);
+        const serverMsg = err.response?.data?.message || err.response?.data?.error || err.message;
+        toast.error("Failed to delete staff: " + serverMsg);
       }
     });
   };
@@ -369,20 +486,40 @@ const Dashboard = () => {
 
           {/* Main Display Area */}
           <section className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-            {activeTab === "vehicles" && <VehiclesTab isLoading={isLoading} vehicles={vehicles} onAddVehicleClick={() => setShowVehicleModal(true)} onDeleteVehicle={handleDeleteVehicle} />}
+            {activeTab === "vehicles" && <VehiclesTab isLoading={isLoading} vehicles={vehicles} onAddVehicleClick={openAddVehicle} onEditVehicle={openEditVehicle} onDeleteVehicle={handleDeleteVehicle} />}
             {activeTab === "rentals" && <RentalsTab isLoading={isLoading} activeRentals={activeRentals} rentalHistory={rentalHistory} onNewRentalClick={() => setShowRentModal(true)} onReturnClick={openReturnModal} />}
-            {activeTab === "customers" && <CustomersTab isLoading={isLoading} customers={customers} onDeleteCustomer={handleDeleteCustomer} />}
+            {activeTab === "customers" && (
+              <>
+                <div className="flex justify-end mb-4">
+                  <button onClick={openAddCustomer} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-blue-700 transition cursor-pointer">
+                    + Add Customer
+                  </button>
+                </div>
+                <CustomersTab isLoading={isLoading} customers={customers} onEditCustomer={openEditCustomer} onDeleteCustomer={handleDeleteCustomer} />
+              </>
+            )}
             {activeTab === "revenue" && <RevenueTab isLoading={isLoading} revenue={revenue} />}
             {activeTab === "maintenance" && <MaintenanceTab isLoading={isLoading} maintenanceRecords={maintenanceRecords} />}
             {activeTab === "promotions" && <PromotionsTab isLoading={isLoading} promotions={promotions} />}
-            {activeTab === "staff" && <StaffTab isLoading={isLoading} staffList={staffList} onDeleteStaff={handleDeleteStaff} />}
+            {activeTab === "staff" && (
+              <>
+                <div className="flex justify-end mb-4">
+                  <button onClick={openAddStaff} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-blue-700 transition cursor-pointer">
+                    + Add Staff
+                  </button>
+                </div>
+                <StaffTab isLoading={isLoading} staffList={staffList} onEditStaff={openEditStaff} onDeleteStaff={handleDeleteStaff} />
+              </>
+            )}
           </section>
         </div>
       </div>
 
-      <VehicleModal show={showVehicleModal} onClose={() => setShowVehicleModal(false)} form={vehicleForm} setForm={setVehicleForm} onSubmit={handleAddVehicle} />
+      <VehicleModal show={showVehicleModal} onClose={() => setShowVehicleModal(false)} form={vehicleForm} setForm={setVehicleForm} onSubmit={handleSaveVehicle} isEdit={isEditVehicle} />
       <ReturnModal show={showReturnModal} onClose={() => setShowReturnModal(false)} rental={selectedRental} form={returnForm} setForm={setReturnForm} onSubmit={handleReturnVehicle} />
       <RentModal show={showRentModal} onClose={() => setShowRentModal(false)} form={rentForm} setForm={setRentForm} onSubmit={handleCreateRental} />
+      <CustomerModal show={showCustomerModal} onClose={() => setShowCustomerModal(false)} form={customerForm} setForm={setCustomerForm} onSubmit={handleSaveCustomer} isEdit={isEditCustomer} />
+      <StaffModal show={showStaffModal} onClose={() => setShowStaffModal(false)} form={staffForm} setForm={setStaffForm} onSubmit={handleSaveStaff} isEdit={isEditStaff} />
       
       <ConfirmModal 
         show={confirmModal.show} 
