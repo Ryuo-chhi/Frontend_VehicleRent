@@ -46,7 +46,7 @@ function VehicleOverlay({ vehicle, day, setDay, calculateTotal, onClose }) {
 
     setSubmitting(true);
     try {
-      const customerResponse = await api.post('/customers', customerForm);
+      const customerResponse = await api.post('/customers/register', customerForm);
       const customer = customerResponse.data;
       setRegisteredCustomerId(customer.customerId);
       localStorage.setItem("customerId", customer.customerId);
