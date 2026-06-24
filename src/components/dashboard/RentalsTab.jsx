@@ -89,12 +89,12 @@ const RentalsTab = ({ activeRentals, rentalHistory, onNewRentalClick, onReturnCl
           ) : (
             rentalHistory.map((h, i) => (
               <tr key={i} className="hover:bg-gray-50 transition">
-                <td className="py-3.5 px-4 font-mono">{h.vehicleCode}</td>
-                <td className="py-3.5 px-4">{h.vehicleModel}</td>
-                <td className="py-3.5 px-4">{h.customerName}</td>
-                <td className="py-3.5 px-4">{h.rentDays}</td>
-                <td className="py-3.5 px-4 font-semibold text-blue-600">${h.totalAmount}</td>
-                <td className="py-3.5 px-4">{h.paymentDate}</td>
+                <td className="py-3.5 px-4 font-mono">{h.rent?.vehicle?.vehicleCode}</td>
+                <td className="py-3.5 px-4">{h.rent?.vehicle?.vehicleModel}</td>
+                <td className="py-3.5 px-4">{h.rent?.customer?.customerName}</td>
+                <td className="py-3.5 px-4">{h.rent?.rentDays}</td>
+                <td className="py-3.5 px-4 font-semibold text-blue-600">${h.totalPaid}</td>
+                <td className="py-3.5 px-4">{h.payDate}</td>
               </tr>
             ))
           )}

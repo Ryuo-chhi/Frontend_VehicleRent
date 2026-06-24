@@ -21,6 +21,8 @@ function VehicleOverlay({ vehicle, day, setDay, calculateTotal, onClose }) {
     customerName: "",
     customerIdNum: "",
     customerPhone: "",
+    email: "",
+    password: "",
   });
   const [registeredCustomerId, setRegisteredCustomerId] = useState(localStorage.getItem("customerId") || null);
 
@@ -52,7 +54,8 @@ function VehicleOverlay({ vehicle, day, setDay, calculateTotal, onClose }) {
       localStorage.setItem("customerId", customer.customerId);
       setBookingStep("form");
     } catch (err) {
-      setBookingError("Failed to register: " + err.message);
+      const serverMsg = err.response?.data?.error || err.response?.data?.message || (typeof err.response?.data === 'string' ? err.response.data : err.message);
+      setBookingError("Failed to register: " + serverMsg);
     } finally {
       setSubmitting(false);
     }
@@ -67,7 +70,7 @@ function VehicleOverlay({ vehicle, day, setDay, calculateTotal, onClose }) {
     setBookingError("");
     setSubmitting(true);
     try {
-      const staffId = 1;
+      const staffId = parseInt(localStorage.getItem("staffId")) || 21;
       const staffUsername = localStorage.getItem("username") || "root_admin";
       await api.post('/rentals', {
         vehicleId: vehicle.vehicleId,
@@ -81,7 +84,8 @@ function VehicleOverlay({ vehicle, day, setDay, calculateTotal, onClose }) {
       });
       setBookingStep("success");
     } catch (err) {
-      setBookingError("Booking failed: " + err.message);
+      const serverMsg = err.response?.data?.error || err.response?.data?.message || (typeof err.response?.data === 'string' ? err.response.data : err.message);
+      setBookingError("Booking failed: " + serverMsg);
     } finally {
       setSubmitting(false);
     }
@@ -199,6 +203,12 @@ function VehicleOverlay({ vehicle, day, setDay, calculateTotal, onClose }) {
                   <input type="text" required placeholder="Phone Number (9-10 digits)" value={customerForm.customerPhone}
                     onChange={(e) => setCustomerForm({...customerForm, customerPhone: e.target.value})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-blue-500" />
+                  <input type="email" required placeholder="Email Address" value={customerForm.email}
+                    onChange={(e) => setCustomerForm({...customerForm, email: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-blue-500" />
+                  <input type="password" required placeholder="Password (min 4 chars)" value={customerForm.password}
+                    onChange={(e) => setCustomerForm({...customerForm, password: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:border-blue-500" />
                   {bookingError && <p className="text-red-500 text-xs">{bookingError}</p>}
                   <div className="flex gap-2">
                     <button type="button" onClick={() => { setShowBooking(false); setBookingStep("form"); }}
@@ -211,10 +221,10 @@ function VehicleOverlay({ vehicle, day, setDay, calculateTotal, onClose }) {
               )}
               {bookingStep === "form" && (
                 <form onSubmit={handleBookNow} className="flex flex-col gap-3">
-                  <h3 className="text-sm font-bold text-gray-800 mb-1">Confirm Booking</h3>
+                  <h3 className="text-sm font-bold text-gray-800 mb-1">Finalize Checkout</h3>
                   {registeredCustomerId && (
                     <div className="bg-green-50 border border-green-200 text-green-700 px-3 py-2 rounded-xl text-xs font-medium">
-                      ✓ Customer registered (ID: {registeredCustomerId})
+                      ✓ Customer details saved for checkout
                     </div>
                   )}
                   <div className="grid grid-cols-2 gap-3">
