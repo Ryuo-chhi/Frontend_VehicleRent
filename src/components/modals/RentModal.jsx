@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { api } from "../../utils/api";
+import api from "../../services/api";
 
 const RentModal = ({ show, onClose, form, setForm, onSubmit }) => {
   const [vehicles, setVehicles] = useState([]);
@@ -11,14 +11,14 @@ const RentModal = ({ show, onClose, form, setForm, onSubmit }) => {
       const fetchOptions = async () => {
         setLoading(true);
         try {
-          const [vData, cData] = await Promise.all([
-            api.get("/api/vehicles"),
-            api.get("/api/customers")
+          const [vRes, cRes] = await Promise.all([
+            api.get("/vehicles"),
+            api.get("/customers")
           ]);
           // Only show available vehicles
-          const availableVehicles = vData.filter(v => v.available);
+          const availableVehicles = vRes.data.filter(v => v.available);
           setVehicles(availableVehicles);
-          setCustomers(cData);
+          setCustomers(cRes.data);
           
           // Auto-select first option if none selected
           if (!form.vehicleId && availableVehicles.length > 0) {

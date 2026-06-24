@@ -1,4 +1,5 @@
 import { useState } from "react";
+import toast from "react-hot-toast";
 import {
   HiOutlineMail,
   HiOutlineLockClosed,
@@ -20,6 +21,7 @@ const Login = ({ switchToSignup, onClose }) => {
 
   const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   //handle input change
   function handleChange(e) {
@@ -48,6 +50,7 @@ const Login = ({ switchToSignup, onClose }) => {
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length === 0) {
+      setIsSubmitting(true);
       try {
         const identifier = form.email.trim();
         const isEmail = identifier.includes("@");
@@ -58,10 +61,15 @@ const Login = ({ switchToSignup, onClose }) => {
 
         // Smart routing: if it contains @, route as customer; otherwise, route as staff
         await login(credentials, isEmail ? 'customer' : 'staff');
+        toast.success("Successfully logged in!");
         onClose?.(); // Close the login modal
       } catch (error) {
-        setApiError(error.response?.data || error.message || "Login failed");
+        const errorMsg = error.response?.data?.message || error.response?.data || error.message || "Login failed";
+        setApiError(errorMsg);
+        toast.error("Login failed: " + errorMsg);
         console.log("Login failed", error);
+      } finally {
+        setIsSubmitting(false);
       }
     }
   }
@@ -121,9 +129,17 @@ const Login = ({ switchToSignup, onClose }) => {
           )}
           <button
             type="submit"
-            className="w-full bg-blue-700 text-white p-3 outline-none rounded-xl cursor-pointer hover:bg-blue-600 transition-colors duration-300"
+            disabled={isSubmitting}
+            className="flex justify-center items-center gap-2 w-full bg-blue-700 text-white p-3 outline-none rounded-xl cursor-pointer hover:bg-blue-600 transition-colors duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            Login
+            {isSubmitting ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                Logging in...
+              </>
+            ) : (
+              "Login"
+            )}
           </button>
         </div>
         <div className="text-center text-sm">

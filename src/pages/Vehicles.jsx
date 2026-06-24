@@ -4,7 +4,7 @@ import { LuCar } from "react-icons/lu";
 import { FaMotorcycle } from "react-icons/fa";
 import { FiSearch } from "react-icons/fi";
 import { useState, useEffect } from "react";
-import { api } from "../utils/api";
+import vehicleService from "../services/vehicleService";
 import { CAR_DATA } from "../data/carCard";
 import { MOTORCYCLE_DATA } from "../data/motor";
 
@@ -47,7 +47,7 @@ export const Vehicles = ({ isNavOpen }) => {
   useEffect(() => {
     const fetchVehicles = async () => {
       try {
-        const data = await api.getVehicles();
+        const data = await vehicleService.getAllVehicles();
         const enriched = data.map(enrichVehicle);
         setCars(enriched.filter((v) => v.vehicleCode?.startsWith("Car")));
         setMotos(enriched.filter((v) => v.vehicleCode?.startsWith("Moto")));

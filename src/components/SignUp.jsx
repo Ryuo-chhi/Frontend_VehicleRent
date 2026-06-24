@@ -1,4 +1,5 @@
 import { useState } from "react";
+import toast from "react-hot-toast";
 import {
   HiOutlineMail,
   HiOutlineLockClosed,
@@ -27,6 +28,7 @@ const Signup = ({ switchToLogin, onClose }) => {
 
   const [errors, setErrors] = useState({});
   const [apiError, setApiError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const getStrength = (pwd) => {
     let score = 0;
@@ -71,6 +73,7 @@ const Signup = ({ switchToLogin, onClose }) => {
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length === 0) {
+      setIsSubmitting(true);
       try {
         const customerData = {
           customerName: form.fullname,
@@ -86,10 +89,15 @@ const Signup = ({ switchToLogin, onClose }) => {
         await authService.customerRegister(customerData);
         // 2. Auto-login customer
         await login({ email: form.email, password: form.password }, 'customer');
+        toast.success("Successfully registered and logged in!");
         onClose?.(); // Close the modal
       } catch (error) {
-        setApiError(error.response?.data || error.message || "Registration failed");
+        const errorMsg = error.response?.data?.message || error.response?.data || error.message || "Registration failed";
+        setApiError(errorMsg);
+        toast.error("Signup failed: " + errorMsg);
         console.log("Signup failed", error);
+      } finally {
+        setIsSubmitting(false);
       }
     }
   }
@@ -170,9 +178,17 @@ const Signup = ({ switchToLogin, onClose }) => {
           )}
           <button
             type="submit"
-            className="w-full bg-blue-700 text-white p-3 outline-none rounded-xl cursor-pointer hover:bg-blue-600 transition-colors duration-300"
+            disabled={isSubmitting}
+            className="flex justify-center items-center gap-2 w-full bg-blue-700 text-white p-3 outline-none rounded-xl cursor-pointer hover:bg-blue-600 transition-colors duration-300 disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            Sign Up
+            {isSubmitting ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                Signing Up...
+              </>
+            ) : (
+              "Sign Up"
+            )}
           </button>
         </div>
 

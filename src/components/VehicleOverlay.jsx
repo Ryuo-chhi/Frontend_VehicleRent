@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { IoCloseOutline } from "react-icons/io5";
-import { api } from "../utils/api";
+import api from "../services/api";
 
 function VehicleOverlay({ vehicle, day, setDay, calculateTotal, onClose }) {
   const isLoggedIn = !!localStorage.getItem("token");
@@ -46,7 +46,8 @@ function VehicleOverlay({ vehicle, day, setDay, calculateTotal, onClose }) {
 
     setSubmitting(true);
     try {
-      const customer = await api.registerCustomer(customerForm);
+      const customerResponse = await api.post('/customers', customerForm);
+      const customer = customerResponse.data;
       setRegisteredCustomerId(customer.customerId);
       localStorage.setItem("customerId", customer.customerId);
       setBookingStep("form");
@@ -68,7 +69,7 @@ function VehicleOverlay({ vehicle, day, setDay, calculateTotal, onClose }) {
     try {
       const staffId = 1;
       const staffUsername = localStorage.getItem("username") || "root_admin";
-      await api.createRental({
+      await api.post('/rentals', {
         vehicleId: vehicle.vehicleId,
         customerId: registeredCustomerId,
         staffId,

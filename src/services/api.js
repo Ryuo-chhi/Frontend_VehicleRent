@@ -14,6 +14,10 @@ api.interceptors.request.use(
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`;
     }
+    // Add idempotency key for unsafe methods
+    if (['post', 'put', 'patch'].includes(config.method?.toLowerCase())) {
+      config.headers['Idempotency-Key'] = crypto.randomUUID();
+    }
     return config;
   },
   (error) => {

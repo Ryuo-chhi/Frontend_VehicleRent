@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { api } from "../utils/api";
+import api from "../services/api";
+import authService from "../services/authService";
 import { 
   HiOutlineTruck, 
   HiOutlineUserGroup, 
@@ -102,11 +103,11 @@ const Dashboard = () => {
     e.preventDefault();
     setStaffLoginError("");
     try {
-      const data = await api.login(staffUsername, staffPassword);
+      const data = await authService.staffLogin(staffUsername, staffPassword);
       if (data.role === "MANAGER" || data.role === "REGULAR") {
         window.location.reload();
       } else {
-        api.logout();
+        await authService.logout();
         setStaffLoginError("Access Denied. Customers do not have access to the staff portal.");
       }
     } catch (err) {
@@ -124,28 +125,28 @@ const Dashboard = () => {
     setIsLoading(true);
     try {
       if (activeTab === "vehicles") {
-        const data = await api.get("/api/vehicles");
-        setVehicles(data);
+        const response = await api.get("/vehicles");
+        setVehicles(response.data);
       } else if (activeTab === "customers") {
-        const data = await api.get("/api/customers");
-        setCustomers(data);
+        const response = await api.get("/customers");
+        setCustomers(response.data);
       } else if (activeTab === "rentals") {
-        const active = await api.get("/api/rentals/active");
-        const history = await api.get("/api/rentals/history");
-        setActiveRentals(active);
-        setRentalHistory(history);
+        const active = await api.get("/rentals/active");
+        const history = await api.get("/rentals/history");
+        setActiveRentals(active.data);
+        setRentalHistory(history.data);
       } else if (activeTab === "revenue") {
-        const rev = await api.get("/api/rentals/revenue");
-        setRevenue(rev);
+        const rev = await api.get("/rentals/revenue");
+        setRevenue(rev.data);
       } else if (activeTab === "maintenance") {
-        const data = await api.get("/api/maintenance-records");
-        setMaintenanceRecords(data);
+        const response = await api.get("/maintenance-records");
+        setMaintenanceRecords(response.data);
       } else if (activeTab === "promotions") {
-        const data = await api.get("/api/promotions");
-        setPromotions(data);
+        const response = await api.get("/promotions");
+        setPromotions(response.data);
       } else if (activeTab === "staff") {
-        const data = await api.get("/api/staffs");
-        setStaffList(Array.isArray(data) ? data : [...data]);
+        const response = await api.get("/staffs");
+        setStaffList(Array.isArray(response.data) ? response.data : [...response.data]);
       }
     } catch (err) {
       console.error("Error fetching dashboard data", err);
@@ -158,7 +159,7 @@ const Dashboard = () => {
   const handleAddVehicle = async (e) => {
     e.preventDefault();
     try {
-      const endpoint = vehicleForm.type === "Car" ? "/api/vehicles/cars" : "/api/vehicles/motos";
+      const endpoint = vehicleForm.type === "Car" ? "/vehicles/cars" : "/vehicles/motos";
       const payload = {
         vehicleType: vehicleForm.type,
         powerSource: vehicleForm.powerSource,
@@ -192,7 +193,7 @@ const Dashboard = () => {
   const handleDeleteVehicle = async (id) => {
     requestConfirm("Are you sure you want to delete this vehicle?", async () => {
       try {
-        await api.delete(`/api/vehicles/${id}`);
+        await api.delete(`/vehicles/${id}`);
         fetchData();
         toast.success("Vehicle deleted successfully");
       } catch (err) {
@@ -211,7 +212,7 @@ const Dashboard = () => {
   const handleReturnVehicle = async (e) => {
     e.preventDefault();
     try {
-      await api.post(`/api/rentals/${selectedRental.rentId}/return`, {
+      await api.post(`/rentals/${selectedRental.rentId}/return`, {
         payDate: returnForm.payDate,
         paymentMethod: returnForm.paymentMethod,
         discount: parseFloat(returnForm.discount),
@@ -230,7 +231,7 @@ const Dashboard = () => {
   const handleCreateRental = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/api/rentals', {
+      await api.post('/rentals', {
         vehicleId: parseInt(rentForm.vehicleId),
         customerId: parseInt(rentForm.customerId),
         staffId: 1,
@@ -252,7 +253,7 @@ const Dashboard = () => {
   const handleDeleteCustomer = async (id) => {
     requestConfirm("Are you sure you want to delete this customer?", async () => {
       try {
-        await api.delete(`/api/customers/${id}`);
+        await api.delete(`/customers/${id}`);
         fetchData();
         toast.success("Customer deleted successfully");
       } catch (err) {
@@ -265,7 +266,7 @@ const Dashboard = () => {
   const handleDeleteStaff = async (id) => {
     requestConfirm("Delete this staff member?", async () => {
       try {
-        await api.delete(`/api/staffs/${id}`);
+        await api.delete(`/staffs/${id}`);
         fetchData();
         toast.success("Staff member deleted successfully");
       } catch (err) {
