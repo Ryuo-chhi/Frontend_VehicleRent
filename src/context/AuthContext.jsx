@@ -34,6 +34,8 @@ export const AuthProvider = ({ children }) => {
       data = await authService.staffLogin(credentials.username, credentials.password);
       setRole(data.role || 'STAFF');
       localStorage.setItem('role', data.role || 'STAFF');
+      localStorage.setItem('staffId', data.staffId);
+      localStorage.setItem('username', data.username);
     } else {
       data = await authService.customerLogin(credentials.email, credentials.password);
       setRole('CUSTOMER');
@@ -48,6 +50,11 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(loggedInUser));
     
+    if (data.customer) {
+      localStorage.setItem('customer', JSON.stringify(data.customer));
+      localStorage.setItem('customerId', data.customer.customerId);
+    }
+    
     return data;
   };
 
@@ -61,6 +68,10 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('role');
+    localStorage.removeItem('customer');
+    localStorage.removeItem('customerId');
+    localStorage.removeItem('staffId');
+    localStorage.removeItem('username');
   };
 
   const value = {

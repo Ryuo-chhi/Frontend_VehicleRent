@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import api from "../services/api";
-import authService from "../services/authService";
+import { useAuth } from "../context/AuthContext";
 import { 
   HiOutlineTruck, 
   HiOutlineUserGroup, 
@@ -27,11 +27,14 @@ import RentModal from "../components/modals/RentModal";
 import ConfirmModal from "../components/modals/ConfirmModal";
 import CustomerModal from "../components/modals/CustomerModal";
 import StaffModal from "../components/modals/StaffModal";
+import RentalDetailsModal from "../components/modals/RentalDetailsModal";
+import MaintenanceModal from "../components/modals/MaintenanceModal";
+import PromotionModal from "../components/modals/PromotionModal";
 
 const Dashboard = () => {
+  const { role, login, logout } = useAuth();
   const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role");
-  const isStaff = token && (role === "MANAGER" || role === "REGULAR");
+  const isStaff = token && (role === "MANAGER" || role === "REGULAR" || role === "STAFF");
 
   const [staffUsername, setStaffUsername] = useState("");
   const [staffPassword, setStaffPassword] = useState("");
@@ -88,6 +91,20 @@ const Dashboard = () => {
     deposit: 0
   });
 
+  const [showRentalDetailsModal, setShowRentalDetailsModal] = useState(false);
+  const [detailedRental, setDetailedRental] = useState(null);
+  const [isHistoryDetail, setIsHistoryDetail] = useState(false);
+
+  const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
+  const [maintenanceForm, setMaintenanceForm] = useState({});
+  const [isEditMaintenance, setIsEditMaintenance] = useState(false);
+  const [editMaintenanceId, setEditMaintenanceId] = useState(null);
+
+  const [showPromotionModal, setShowPromotionModal] = useState(false);
+  const [promotionForm, setPromotionForm] = useState({ active: true });
+  const [isEditPromotion, setIsEditPromotion] = useState(false);
+  const [editPromotionId, setEditPromotionId] = useState(null);
+
   const [confirmModal, setConfirmModal] = useState({
     show: false,
     message: "",
@@ -109,11 +126,11 @@ const Dashboard = () => {
     e.preventDefault();
     setStaffLoginError("");
     try {
-      const data = await authService.staffLogin(staffUsername, staffPassword);
-      if (data.role === "MANAGER" || data.role === "REGULAR") {
+      const data = await login({ username: staffUsername, password: staffPassword }, 'staff');
+      if (data.role === "MANAGER" || data.role === "REGULAR" || data.role === "STAFF") {
         window.location.reload();
       } else {
-        await authService.logout();
+        await logout();
         setStaffLoginError("Access Denied. Customers do not have access to the staff portal.");
       }
     } catch (err) {
@@ -241,7 +258,36 @@ const Dashboard = () => {
   // Open Return Modal
   const openReturnModal = (rental) => {
     setSelectedRental(rental);
+    setReturnForm({
+      payDate: new Date().toISOString().split('T')[0],
+      paymentMethod: "CASH",
+      discount: 0,
+      damageFee: 0,
+      extraDays: 0
+    });
     setShowReturnModal(true);
+  };
+
+  const handleViewRentalDetails = (rental, isHistory) => {
+    setDetailedRental(rental);
+    setIsHistoryDetail(isHistory);
+    setShowRentalDetailsModal(true);
+  };
+
+  const handleNavigateToCustomer = (customer) => {
+    setShowRentalDetailsModal(false);
+    setActiveTab("customers");
+    if (customer) {
+      openEditCustomer(customer);
+    }
+  };
+
+  const handleNavigateToVehicle = (vehicle) => {
+    setShowRentalDetailsModal(false);
+    setActiveTab("vehicles");
+    if (vehicle) {
+      openEditVehicle(vehicle);
+    }
   };
 
   // Process Return
@@ -271,7 +317,7 @@ const Dashboard = () => {
       await api.post('/rentals', {
         vehicleId: parseInt(rentForm.vehicleId),
         customerId: parseInt(rentForm.customerId),
-        staffId: 1,
+        staffId: parseInt(localStorage.getItem('staffId')) || 1,
         staffUsername: localStorage.getItem('username') || 'root_admin',
         rentDays: parseInt(rentForm.rentDays),
         startDate: rentForm.startDate,
@@ -392,6 +438,107 @@ const Dashboard = () => {
     });
   };
 
+  // Maintenance Handlers
+  const handleSaveMaintenance = async (e) => {
+    e.preventDefault();
+    try {
+      if (isEditMaintenance) {
+        await api.put(`/maintenance-records/${editMaintenanceId}`, maintenanceForm);
+      } else {
+        await api.post('/maintenance-records', {
+          vehicleId: parseInt(maintenanceForm.vehicleId),
+          details: maintenanceForm.details,
+          cost: parseFloat(maintenanceForm.cost),
+          startDate: maintenanceForm.startDate
+        });
+      }
+      setShowMaintenanceModal(false);
+      fetchData();
+      toast.success(isEditMaintenance ? "Maintenance updated" : "Maintenance created");
+    } catch (err) {
+      const serverMsg = err.response?.data?.message || err.response?.data?.error || err.message;
+      toast.error(`Failed to save maintenance: ` + serverMsg);
+    }
+  };
+
+  const openAddMaintenance = () => {
+    setIsEditMaintenance(false);
+    setEditMaintenanceId(null);
+    setMaintenanceForm({
+      startDate: new Date().toISOString().split('T')[0],
+      cost: 0
+    });
+    setShowMaintenanceModal(true);
+  };
+
+  const openEditMaintenance = (record) => {
+    setIsEditMaintenance(true);
+    setEditMaintenanceId(record.maintenanceId);
+    setMaintenanceForm({ ...record });
+    setShowMaintenanceModal(true);
+  };
+
+  const handleDeleteMaintenance = async (id) => {
+    requestConfirm("Delete this maintenance record?", async () => {
+      try {
+        await api.delete(`/maintenance-records/${id}`);
+        fetchData();
+        toast.success("Maintenance record deleted");
+      } catch (err) {
+        toast.error("Failed to delete maintenance record");
+      }
+    });
+  };
+
+  // Promotion Handlers
+  const handleSavePromotion = async (e) => {
+    e.preventDefault();
+    try {
+      const payload = {
+        code: promotionForm.code.toUpperCase(),
+        discountPercent: parseFloat(promotionForm.discountPercent),
+        active: promotionForm.active
+      };
+      if (isEditPromotion) {
+        await api.put(`/promotions/${editPromotionId}`, payload);
+      } else {
+        await api.post('/promotions', payload);
+      }
+      setShowPromotionModal(false);
+      fetchData();
+      toast.success(isEditPromotion ? "Promotion updated" : "Promotion created");
+    } catch (err) {
+      const serverMsg = err.response?.data?.message || err.response?.data?.error || err.message;
+      toast.error(`Failed to save promotion: ` + serverMsg);
+    }
+  };
+
+  const openAddPromotion = () => {
+    setIsEditPromotion(false);
+    setEditPromotionId(null);
+    setPromotionForm({ active: true, discountPercent: 0 });
+    setShowPromotionModal(true);
+  };
+
+  const openEditPromotion = (promo) => {
+    setIsEditPromotion(true);
+    setEditPromotionId(promo.promoId);
+    setPromotionForm({ ...promo });
+    setShowPromotionModal(true);
+  };
+
+  const handleDeletePromotion = async (id) => {
+    requestConfirm("Delete this promotion?", async () => {
+      try {
+        await api.delete(`/promotions/${id}`);
+        fetchData();
+        toast.success("Promotion deleted");
+      } catch (err) {
+        toast.error("Failed to delete promotion");
+      }
+    });
+  };
+
   if (!isStaff) {
     return (
       <main className="min-h-screen pt-24 pb-12 bg-gray-50 flex items-center justify-center px-4 sm:px-6 lg:px-8">
@@ -487,30 +634,12 @@ const Dashboard = () => {
           {/* Main Display Area */}
           <section className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
             {activeTab === "vehicles" && <VehiclesTab isLoading={isLoading} vehicles={vehicles} onAddVehicleClick={openAddVehicle} onEditVehicle={openEditVehicle} onDeleteVehicle={handleDeleteVehicle} />}
-            {activeTab === "rentals" && <RentalsTab isLoading={isLoading} activeRentals={activeRentals} rentalHistory={rentalHistory} onNewRentalClick={() => setShowRentModal(true)} onReturnClick={openReturnModal} />}
-            {activeTab === "customers" && (
-              <>
-                <div className="flex justify-end mb-4">
-                  <button onClick={openAddCustomer} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-blue-700 transition cursor-pointer">
-                    + Add Customer
-                  </button>
-                </div>
-                <CustomersTab isLoading={isLoading} customers={customers} onEditCustomer={openEditCustomer} onDeleteCustomer={handleDeleteCustomer} />
-              </>
-            )}
-            {activeTab === "revenue" && <RevenueTab isLoading={isLoading} revenue={revenue} />}
-            {activeTab === "maintenance" && <MaintenanceTab isLoading={isLoading} maintenanceRecords={maintenanceRecords} />}
-            {activeTab === "promotions" && <PromotionsTab isLoading={isLoading} promotions={promotions} />}
-            {activeTab === "staff" && (
-              <>
-                <div className="flex justify-end mb-4">
-                  <button onClick={openAddStaff} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-blue-700 transition cursor-pointer">
-                    + Add Staff
-                  </button>
-                </div>
-                <StaffTab isLoading={isLoading} staffList={staffList} onEditStaff={openEditStaff} onDeleteStaff={handleDeleteStaff} />
-              </>
-            )}
+            {activeTab === "rentals" && <RentalsTab isLoading={isLoading} activeRentals={activeRentals} rentalHistory={rentalHistory} onNewRentalClick={() => setShowRentModal(true)} onReturnClick={openReturnModal} onViewDetails={handleViewRentalDetails} />}
+            {activeTab === "customers" && <CustomersTab isLoading={isLoading} customers={customers} onEditCustomer={openEditCustomer} onDeleteCustomer={handleDeleteCustomer} onAddCustomer={openAddCustomer} />}
+            {activeTab === "revenue" && <RevenueTab isLoading={isLoading} revenue={revenue} rentalHistory={rentalHistory} />}
+            {activeTab === "maintenance" && <MaintenanceTab isLoading={isLoading} maintenanceRecords={maintenanceRecords} onAddClick={openAddMaintenance} onEditClick={openEditMaintenance} onDeleteClick={handleDeleteMaintenance} />}
+            {activeTab === "promotions" && <PromotionsTab isLoading={isLoading} promotions={promotions} onAddClick={openAddPromotion} onEditClick={openEditPromotion} onDeleteClick={handleDeletePromotion} />}
+            {activeTab === "staff" && <StaffTab isLoading={isLoading} staffList={staffList} onEditStaff={openEditStaff} onDeleteStaff={handleDeleteStaff} onAddStaff={openAddStaff} />}
           </section>
         </div>
       </div>
@@ -520,6 +649,9 @@ const Dashboard = () => {
       <RentModal show={showRentModal} onClose={() => setShowRentModal(false)} form={rentForm} setForm={setRentForm} onSubmit={handleCreateRental} />
       <CustomerModal show={showCustomerModal} onClose={() => setShowCustomerModal(false)} form={customerForm} setForm={setCustomerForm} onSubmit={handleSaveCustomer} isEdit={isEditCustomer} />
       <StaffModal show={showStaffModal} onClose={() => setShowStaffModal(false)} form={staffForm} setForm={setStaffForm} onSubmit={handleSaveStaff} isEdit={isEditStaff} />
+      <RentalDetailsModal show={showRentalDetailsModal} onClose={() => setShowRentalDetailsModal(false)} rental={detailedRental} isHistory={isHistoryDetail} onNavigateToCustomer={handleNavigateToCustomer} onNavigateToVehicle={handleNavigateToVehicle} />
+      <MaintenanceModal show={showMaintenanceModal} onClose={() => setShowMaintenanceModal(false)} form={maintenanceForm} setForm={setMaintenanceForm} onSubmit={handleSaveMaintenance} isEdit={isEditMaintenance} />
+      <PromotionModal show={showPromotionModal} onClose={() => setShowPromotionModal(false)} form={promotionForm} setForm={setPromotionForm} onSubmit={handleSavePromotion} isEdit={isEditPromotion} />
       
       <ConfirmModal 
         show={confirmModal.show} 

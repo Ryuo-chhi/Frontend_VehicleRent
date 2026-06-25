@@ -17,14 +17,18 @@ function VehicleOverlay({ vehicle, day, setDay, calculateTotal, onClose }) {
   const [bookingError, setBookingError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  const savedCustomerStr = localStorage.getItem("customer");
+  const savedCustomer = savedCustomerStr ? JSON.parse(savedCustomerStr) : null;
+  const initialCustomerId = localStorage.getItem("customerId") || null;
+
   const [customerForm, setCustomerForm] = useState({
-    customerName: "",
-    customerIdNum: "",
-    customerPhone: "",
-    email: "",
+    customerName: savedCustomer?.customerName || "",
+    customerIdNum: savedCustomer?.customerIdNum === 'TBD' ? "" : (savedCustomer?.customerIdNum || ""),
+    customerPhone: savedCustomer?.customerPhone === '000000000' ? "" : (savedCustomer?.customerPhone || ""),
+    email: savedCustomer?.email?.includes('@placeholder.com') ? "" : (savedCustomer?.email || ""),
     password: "",
   });
-  const [registeredCustomerId, setRegisteredCustomerId] = useState(localStorage.getItem("customerId") || null);
+  const [registeredCustomerId, setRegisteredCustomerId] = useState(initialCustomerId);
 
   const [bookingForm, setBookingForm] = useState({
     startDate: new Date().toISOString().split("T")[0],
@@ -48,14 +52,24 @@ function VehicleOverlay({ vehicle, day, setDay, calculateTotal, onClose }) {
 
     setSubmitting(true);
     try {
-      const customerResponse = await api.post('/customers/register', customerForm);
-      const customer = customerResponse.data;
-      setRegisteredCustomerId(customer.customerId);
-      localStorage.setItem("customerId", customer.customerId);
+      let customerId = initialCustomerId;
+      if (customerId) {
+        // Update existing customer profile
+        const customerResponse = await api.put(`/customers/${customerId}`, customerForm);
+        localStorage.setItem("customer", JSON.stringify(customerResponse.data));
+      } else {
+        // Register new customer
+        const customerResponse = await api.post('/customers/register', customerForm);
+        const customer = customerResponse.data;
+        customerId = customer.customerId;
+        setRegisteredCustomerId(customerId);
+        localStorage.setItem("customerId", customerId);
+        localStorage.setItem("customer", JSON.stringify(customer));
+      }
       setBookingStep("form");
     } catch (err) {
       const serverMsg = err.response?.data?.error || err.response?.data?.message || (typeof err.response?.data === 'string' ? err.response.data : err.message);
-      setBookingError("Failed to register: " + serverMsg);
+      setBookingError("Failed to process customer: " + serverMsg);
     } finally {
       setSubmitting(false);
     }
@@ -172,7 +186,16 @@ function VehicleOverlay({ vehicle, day, setDay, calculateTotal, onClose }) {
                 onClick={() => {
                   if (vehicle.available === false) return;
                   setShowBooking(true);
-                  if (!localStorage.getItem("customerId") && !registeredCustomerId) {
+                  
+                  const savedCustStr = localStorage.getItem("customer");
+                  const savedCust = savedCustStr ? JSON.parse(savedCustStr) : null;
+                  
+                  const needsUpdate = !savedCust || 
+                    savedCust.customerIdNum === 'TBD' || !savedCust.customerIdNum ||
+                    savedCust.customerPhone === '000000000' || !savedCust.customerPhone ||
+                    savedCust.email?.includes('@placeholder.com') || !savedCust.email;
+
+                  if (needsUpdate) {
                     setBookingStep("register");
                   } else {
                     setBookingStep("form");
@@ -215,7 +238,7 @@ function VehicleOverlay({ vehicle, day, setDay, calculateTotal, onClose }) {
                       className="flex-1 px-3 py-2 border border-gray-300 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition cursor-pointer">Cancel</button>
                     <button type="submit" disabled={submitting}
                       className="flex-1 px-3 py-2 text-white rounded-xl text-sm font-semibold transition cursor-pointer disabled:opacity-50"
-                      style={{ backgroundColor: color }}>{submitting ? "Registering..." : "Continue"}</button>
+                      style={{ backgroundColor: color }}>{submitting ? "Processing..." : (initialCustomerId ? "Update & Continue" : "Continue")}</button>
                   </div>
                 </form>
               )}

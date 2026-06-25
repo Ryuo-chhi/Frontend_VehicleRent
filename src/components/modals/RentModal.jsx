@@ -7,6 +7,17 @@ const RentModal = ({ show, onClose, form, setForm, onSubmit }) => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (form.startDate && form.rentDays) {
+      const start = new Date(form.startDate);
+      start.setDate(start.getDate() + parseInt(form.rentDays));
+      const newEndDate = start.toISOString().split('T')[0];
+      if (form.endDate !== newEndDate) {
+        setForm(prev => ({ ...prev, endDate: newEndDate }));
+      }
+    }
+  }, [form.startDate, form.rentDays, setForm]);
+
+  useEffect(() => {
     if (show) {
       const fetchOptions = async () => {
         setLoading(true);
@@ -24,8 +35,8 @@ const RentModal = ({ show, onClose, form, setForm, onSubmit }) => {
           if (!form.vehicleId && availableVehicles.length > 0) {
             setForm(prev => ({ ...prev, vehicleId: availableVehicles[0].vehicleId }));
           }
-          if (!form.customerId && cData.length > 0) {
-            setForm(prev => ({ ...prev, customerId: cData[0].customerId }));
+          if (!form.customerId && cRes.data.length > 0) {
+            setForm(prev => ({ ...prev, customerId: cRes.data[0].customerId }));
           }
         } catch (err) {
           console.error("Failed to fetch rent options", err);
