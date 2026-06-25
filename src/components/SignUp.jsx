@@ -22,7 +22,7 @@ const Signup = ({ switchToLogin, onClose }) => {
   const [show, setShow] = useState(false);
   const [form, setForm] = useState({
     fullname: "",
-    email: "",
+    identifier: "",
     password: "",
   });
 
@@ -57,8 +57,11 @@ const Signup = ({ switchToLogin, onClose }) => {
     const fullnameError = validateFullName(form.fullname);
     if (fullnameError) newErrors.fullname = fullnameError;
 
-    const emailError = validateEmail(form.email);
-    if (emailError) newErrors.email = emailError;
+    if (!form.identifier.trim()) {
+      newErrors.identifier = "Email Address or Phone Number is required";
+    } else if (!form.identifier.includes('@') && !/^[0-9]{9,10}$/.test(form.identifier)) {
+      newErrors.identifier = "Please enter a valid email or a 9-10 digit phone number";
+    }
 
     const passwordError = validatePassword(form.password);
     if (passwordError) newErrors.password = passwordError;
@@ -75,11 +78,14 @@ const Signup = ({ switchToLogin, onClose }) => {
     if (Object.keys(validationErrors).length === 0) {
       setIsSubmitting(true);
       try {
+        const identifier = form.identifier.trim();
+        const isEmail = identifier.includes('@');
+        
         const customerData = {
           customerName: form.fullname,
-          email: form.email,
-          customerIdNum: 'TBD', // Required by database validation
-          customerPhone: '000000000', // Required by database validation (9 digits)
+          email: isEmail ? identifier : `${identifier}@placeholder.com`,
+          customerIdNum: 'TBD',
+          customerPhone: isEmail ? '000000000' : identifier,
           password: form.password,
           idCardPhoto: 'TBD',
           driverLicensePhoto: 'TBD'
@@ -88,7 +94,7 @@ const Signup = ({ switchToLogin, onClose }) => {
         // 1. Register customer
         await authService.customerRegister(customerData);
         // 2. Auto-login customer
-        await login({ email: form.email, password: form.password }, 'customer');
+        await login({ email: identifier, password: form.password }, 'customer');
         toast.success("Successfully registered and logged in!");
         onClose?.(); // Close the modal
       } catch (error) {
@@ -125,15 +131,15 @@ const Signup = ({ switchToLogin, onClose }) => {
         </div>
         
         <div>
-          <p className="text-sm font-medium mb-1">Email Address</p>
+          <p className="text-sm font-medium mb-1">Email Address or Phone Number</p>
           <InputWithIcon
             icon={HiOutlineMail}
-            type="email"
-            name="email"
-            placeholder="you@email.com"
+            type="text"
+            name="identifier"
+            placeholder="you@email.com or 012345678"
             handleChange={handleChange}
           />
-          {errors.email && <small className="text-red-500 block mt-0.5">{errors.email}</small>}
+          {errors.identifier && <small className="text-red-500 block mt-0.5">{errors.identifier}</small>}
         </div>
 
         <div>

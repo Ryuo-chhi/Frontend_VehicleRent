@@ -1,4 +1,6 @@
-import { HiOutlinePlus, HiOutlineCheckCircle, HiOutlineXCircle, HiOutlineTrash, HiOutlinePencil } from "react-icons/hi";
+import { HiOutlinePlus, HiOutlineCheckCircle, HiOutlineXCircle, HiOutlineTrash, HiOutlinePencil, HiOutlineTruck } from "react-icons/hi";
+import EmptyState from "./EmptyState";
+import SkeletonRows from "./SkeletonRows";
 
 const VehiclesTab = ({ vehicles, onAddVehicleClick, onEditVehicle, onDeleteVehicle, isLoading }) => {
   const totalVehicles = vehicles.length;
@@ -34,7 +36,7 @@ const VehiclesTab = ({ vehicles, onAddVehicleClick, onEditVehicle, onDeleteVehic
             <th className="py-3 px-4">Code</th>
             <th className="py-3 px-4">Brand / Model</th>
             <th className="py-3 px-4">Class</th>
-            <th className="py-3 px-4">Rate/Day</th>
+            <th className="py-3 px-4 text-right">Rate/Day</th>
             <th className="py-3 px-4">Licence Plate</th>
             <th className="py-3 px-4">Status</th>
             <th className="py-3 px-4 text-right">Actions</th>
@@ -42,15 +44,17 @@ const VehiclesTab = ({ vehicles, onAddVehicleClick, onEditVehicle, onDeleteVehic
         </thead>
         <tbody className="divide-y divide-gray-100 text-sm text-gray-700">
           {isLoading ? (
-            <tr>
-              <td colSpan="7" className="text-center py-10">
-                <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
-              </td>
-            </tr>
+            <SkeletonRows columns={7} rows={5} />
           ) : vehicles.length === 0 ? (
             <tr>
-              <td colSpan="7" className="text-center py-8 text-gray-400">
-                No vehicles found. Click "Add Vehicle" to register one.
+              <td colSpan="7">
+                <EmptyState
+                  icon={HiOutlineTruck}
+                  title="No vehicles yet"
+                  description="Register your first vehicle to start managing your fleet."
+                  actionLabel="Add Vehicle"
+                  onAction={onAddVehicleClick}
+                />
               </td>
             </tr>
           ) : (
@@ -61,7 +65,7 @@ const VehiclesTab = ({ vehicles, onAddVehicleClick, onEditVehicle, onDeleteVehic
                   <span className="font-semibold text-gray-900">{v.vehicleBrand}</span> {v.vehicleModel}
                 </td>
                 <td className="py-3.5 px-4 capitalize">{v.vehicleClass}</td>
-                <td className="py-3.5 px-4 font-semibold text-blue-600">${v.rentalRatePerDay}</td>
+                <td className="py-3.5 px-4 font-semibold text-blue-600 text-right tabular-nums">${v.rentalRatePerDay}</td>
                 <td className="py-3.5 px-4 font-mono">{v.licencePlate}</td>
                 <td className="py-3.5 px-4">
                   {v.available ? (
@@ -77,17 +81,19 @@ const VehiclesTab = ({ vehicles, onAddVehicleClick, onEditVehicle, onDeleteVehic
                 <td className="py-3.5 px-4 text-right flex justify-end gap-2">
                   <button
                     onClick={() => onEditVehicle(v)}
-                    className="text-blue-500 hover:text-blue-700 p-1 rounded transition cursor-pointer"
-                    title="Edit Vehicle"
+                    className="group relative text-blue-500 hover:text-blue-700 p-1.5 rounded-lg hover:bg-blue-50 transition cursor-pointer"
+                    aria-label="Edit vehicle"
                   >
                     <HiOutlinePencil size={18} />
+                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">Edit</span>
                   </button>
                   <button
                     onClick={() => onDeleteVehicle(v.vehicleId)}
-                    className="text-red-500 hover:text-red-700 p-1 rounded transition cursor-pointer"
-                    title="Delete Vehicle"
+                    className="group relative text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 transition cursor-pointer"
+                    aria-label="Delete vehicle"
                   >
                     <HiOutlineTrash size={18} />
+                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">Delete</span>
                   </button>
                 </td>
               </tr>

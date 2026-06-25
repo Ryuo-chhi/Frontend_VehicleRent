@@ -15,7 +15,7 @@ const Login = ({ switchToSignup, onClose }) => {
   const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({
-    email: "", // Accepts email or staff username
+    email: "",
     password: "",
   });
 
@@ -35,7 +35,7 @@ const Login = ({ switchToSignup, onClose }) => {
   function validate() {
     let newErrors = {};
     if (!form.email.trim()) {
-      newErrors.email = "Email Address or Username is required";
+      newErrors.email = "Email Address or Phone Number is required";
     }
     if (!form.password) {
       newErrors.password = "Password is required";
@@ -52,22 +52,13 @@ const Login = ({ switchToSignup, onClose }) => {
     if (Object.keys(validationErrors).length === 0) {
       setIsSubmitting(true);
       try {
-        const identifier = form.email.trim();
-        const isEmail = identifier.includes("@");
-
-        const credentials = isEmail
-          ? { email: identifier, password: form.password }
-          : { username: identifier, password: form.password };
-
-        // Smart routing: if it contains @, route as customer; otherwise, route as staff
-        await login(credentials, isEmail ? 'customer' : 'staff');
+        await login({ email: form.email.trim(), password: form.password }, 'customer');
         toast.success("Successfully logged in!");
-        onClose?.(); // Close the login modal
+        onClose?.();
       } catch (error) {
         const errorMsg = error.response?.data?.message || error.response?.data || error.message || "Login failed";
         setApiError(errorMsg);
         toast.error("Login failed: " + errorMsg);
-        console.log("Login failed", error);
       } finally {
         setIsSubmitting(false);
       }
@@ -88,12 +79,12 @@ const Login = ({ switchToSignup, onClose }) => {
 
       <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
         <div>
-          <p className="text-sm font-medium mb-1">Email Address</p>
+          <p className="text-sm font-medium mb-1">Email Address or Phone Number</p>
           <InputWithIcon
             icon={HiOutlineMail}
             type="text"
             name="email"
-            placeholder="you@email.com or username"
+            placeholder="you@email.com or 012345678"
             handleChange={handleChange}
           />
         </div>
