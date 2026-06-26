@@ -10,6 +10,7 @@ import {
   HiOutlineTag,
   HiOutlineUsers
 } from "react-icons/hi";
+import { HiOutlineSearch } from 'react-icons/hi';
 import toast from "react-hot-toast";
 
 // Import tabs
@@ -40,6 +41,7 @@ const Dashboard = () => {
   const [staffPassword, setStaffPassword] = useState("");
   const [staffLoginError, setStaffLoginError] = useState("");
 
+  const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("vehicles");
   const [vehicles, setVehicles] = useState([]);
   const [customers, setCustomers] = useState([]);
@@ -154,8 +156,10 @@ const Dashboard = () => {
         const response = await api.get("/customers");
         setCustomers(response.data);
       } else if (activeTab === "rentals") {
-        const active = await api.get("/rentals/active");
-        const history = await api.get("/rentals/history");
+        const [active, history] = await Promise.all([
+          api.get("/rentals/active"),
+          api.get("/rentals/history")
+        ]);
         setActiveRentals(active.data);
         setRentalHistory(history.data);
       } else if (activeTab === "revenue") {
@@ -315,14 +319,14 @@ const Dashboard = () => {
     e.preventDefault();
     try {
       await api.post('/rentals', {
-        vehicleId: parseInt(rentForm.vehicleId),
-        customerId: parseInt(rentForm.customerId),
+        vehicleId: parseInt(rentForm.vehicleId) || 0,
+        customerId: parseInt(rentForm.customerId) || 0,
         staffId: parseInt(localStorage.getItem('staffId')) || 1,
         staffUsername: localStorage.getItem('username') || 'root_admin',
-        rentDays: parseInt(rentForm.rentDays),
+        rentDays: parseInt(rentForm.rentDays) || 1,
         startDate: rentForm.startDate,
         endDate: rentForm.endDate,
-        deposit: parseFloat(rentForm.deposit)
+        deposit: parseFloat(rentForm.deposit) || 0
       });
       setShowRentModal(false);
       fetchData();
@@ -599,7 +603,21 @@ const Dashboard = () => {
   return (
     <main className="min-h-screen pt-24 pb-12 bg-gray-50 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight mb-8">Staff Management Dashboard</h1>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
+          <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Staff Management Dashboard</h1>
+          <div className="relative w-full sm:w-72">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <HiOutlineSearch className="text-gray-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white shadow-sm"
+            />
+          </div>
+        </div>
 
         {/* Sidebar / Tabs */}
         <div className="flex flex-col md:flex-row gap-8">
@@ -633,19 +651,19 @@ const Dashboard = () => {
 
           {/* Main Display Area */}
           <section className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-            {activeTab === "vehicles" && <VehiclesTab isLoading={isLoading} vehicles={vehicles} onAddVehicleClick={openAddVehicle} onEditVehicle={openEditVehicle} onDeleteVehicle={handleDeleteVehicle} />}
-            {activeTab === "rentals" && <RentalsTab isLoading={isLoading} activeRentals={activeRentals} rentalHistory={rentalHistory} onNewRentalClick={() => setShowRentModal(true)} onReturnClick={openReturnModal} onViewDetails={handleViewRentalDetails} />}
-            {activeTab === "customers" && <CustomersTab isLoading={isLoading} customers={customers} onEditCustomer={openEditCustomer} onDeleteCustomer={handleDeleteCustomer} onAddCustomer={openAddCustomer} />}
+            {activeTab === "vehicles" && <VehiclesTab isLoading={isLoading} vehicles={vehicles} onAddVehicleClick={openAddVehicle} onEditVehicle={openEditVehicle} onDeleteVehicle={handleDeleteVehicle} searchQuery={searchQuery} />}
+            {activeTab === "rentals" && <RentalsTab isLoading={isLoading} activeRentals={activeRentals} rentalHistory={rentalHistory} onNewRentalClick={() => setShowRentModal(true)} onReturnClick={openReturnModal} onViewDetails={handleViewRentalDetails} searchQuery={searchQuery} />}
+            {activeTab === "customers" && <CustomersTab isLoading={isLoading} customers={customers} onEditCustomer={openEditCustomer} onDeleteCustomer={handleDeleteCustomer} onAddCustomer={openAddCustomer} searchQuery={searchQuery} />}
             {activeTab === "revenue" && <RevenueTab isLoading={isLoading} revenue={revenue} rentalHistory={rentalHistory} />}
-            {activeTab === "maintenance" && <MaintenanceTab isLoading={isLoading} maintenanceRecords={maintenanceRecords} onAddClick={openAddMaintenance} onEditClick={openEditMaintenance} onDeleteClick={handleDeleteMaintenance} />}
-            {activeTab === "promotions" && <PromotionsTab isLoading={isLoading} promotions={promotions} onAddClick={openAddPromotion} onEditClick={openEditPromotion} onDeleteClick={handleDeletePromotion} />}
-            {activeTab === "staff" && <StaffTab isLoading={isLoading} staffList={staffList} onEditStaff={openEditStaff} onDeleteStaff={handleDeleteStaff} onAddStaff={openAddStaff} />}
+            {activeTab === "maintenance" && <MaintenanceTab isLoading={isLoading} maintenanceRecords={maintenanceRecords} onAddClick={openAddMaintenance} onEditClick={openEditMaintenance} onDeleteClick={handleDeleteMaintenance} searchQuery={searchQuery} />}
+            {activeTab === "promotions" && <PromotionsTab isLoading={isLoading} promotions={promotions} onAddClick={openAddPromotion} onEditClick={openEditPromotion} onDeleteClick={handleDeletePromotion} searchQuery={searchQuery} />}
+            {activeTab === "staff" && <StaffTab isLoading={isLoading} staffList={staffList} onEditStaff={openEditStaff} onDeleteStaff={handleDeleteStaff} onAddStaff={openAddStaff} searchQuery={searchQuery} />}
           </section>
         </div>
       </div>
 
       <VehicleModal show={showVehicleModal} onClose={() => setShowVehicleModal(false)} form={vehicleForm} setForm={setVehicleForm} onSubmit={handleSaveVehicle} isEdit={isEditVehicle} />
-      <ReturnModal show={showReturnModal} onClose={() => setShowReturnModal(false)} rental={selectedRental} form={returnForm} setForm={setReturnForm} onSubmit={handleReturnVehicle} />
+      <ReturnModal show={showReturnModal} onClose={() => setShowReturnModal(false)} rental={selectedRental} form={returnForm} setForm={setReturnForm} onSubmit={handleReturnVehicle} promotions={promotions} />
       <RentModal show={showRentModal} onClose={() => setShowRentModal(false)} form={rentForm} setForm={setRentForm} onSubmit={handleCreateRental} />
       <CustomerModal show={showCustomerModal} onClose={() => setShowCustomerModal(false)} form={customerForm} setForm={setCustomerForm} onSubmit={handleSaveCustomer} isEdit={isEditCustomer} />
       <StaffModal show={showStaffModal} onClose={() => setShowStaffModal(false)} form={staffForm} setForm={setStaffForm} onSubmit={handleSaveStaff} isEdit={isEditStaff} />

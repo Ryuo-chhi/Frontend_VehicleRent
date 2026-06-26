@@ -3,7 +3,14 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   PieChart, Pie, Cell, Legend, BarChart, Bar 
 } from 'recharts';
-import { HiOutlineCurrencyDollar, HiOutlineClipboardList, HiOutlineTruck, HiOutlineTrendingUp } from 'react-icons/hi';
+import { HiOutlineCurrencyDollar, HiOutlineClipboardList, HiOutlineTruck, HiOutlineTrendingUp, HiOutlineDocumentDownload } from 'react-icons/hi';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+
+const formatCurrency = (val) => {
+  if (typeof val !== 'number' || isNaN(val)) return '0.00';
+  return (Math.ceil(val * 100) / 100).toFixed(2);
+};
 
 const KPICard = ({ label, value, icon: Icon, color }) => {
   const colorMap = {
@@ -33,6 +40,8 @@ const KPICard = ({ label, value, icon: Icon, color }) => {
 
 const RevenueTab = ({ revenue, rentalHistory = [], isLoading }) => {
   const [timeFilter, setTimeFilter] = useState('ALL');
+  const [customStart, setCustomStart] = useState('');
+  const [customEnd, setCustomEnd] = useState('');
 
   const filteredHistory = useMemo(() => {
     if (!rentalHistory || rentalHistory.length === 0) return [];
@@ -40,13 +49,26 @@ const RevenueTab = ({ revenue, rentalHistory = [], isLoading }) => {
     return rentalHistory.filter(record => {
       if (!record.payDate) return false;
       if (timeFilter === 'ALL') return true;
+      
       const recDate = new Date(record.payDate);
+      
+      if (timeFilter === 'CUSTOM') {
+        if (customStart && recDate < new Date(customStart)) return false;
+        // set End time to end of day
+        if (customEnd) {
+          const endObj = new Date(customEnd);
+          endObj.setHours(23, 59, 59, 999);
+          if (recDate > endObj) return false;
+        }
+        return true;
+      }
+
       const diffDays = Math.ceil(Math.abs(now - recDate) / (1000 * 60 * 60 * 24));
       if (timeFilter === '7DAYS') return diffDays <= 7;
       if (timeFilter === '30DAYS') return diffDays <= 30;
       return true;
     });
-  }, [rentalHistory, timeFilter]);
+  }, [rentalHistory, timeFilter, customStart, customEnd]);
 
   const filteredRevenue = useMemo(() => {
     if (timeFilter === 'ALL' && revenue) return revenue;
@@ -75,7 +97,8 @@ const RevenueTab = ({ revenue, rentalHistory = [], isLoading }) => {
 
   const barChartData = useMemo(() => {
     const grouped = filteredHistory.reduce((acc, curr) => {
-      const vType = curr.rent?.vehicle?.vehicleType || 'Unknown';
+      const vCode = curr.rent?.vehicle?.vehicleCode || '';
+      const vType = vCode ? vCode.split('-')[0] : 'Unknown';
       acc[vType] = (acc[vType] || 0) + curr.totalPaid;
       return acc;
     }, {});
@@ -91,23 +114,158 @@ const RevenueTab = ({ revenue, rentalHistory = [], isLoading }) => {
       return (
         <div className="bg-white p-3 border border-gray-100 shadow-xl rounded-xl">
           <p className="text-sm font-semibold text-gray-800">{label}</p>
-          <p className="text-sm text-blue-600 font-bold">${payload[0].value.toFixed(2)}</p>
+          <p className="text-sm text-blue-600 font-bold">${formatCurrency(payload[0].value)}</p>
         </div>
       );
     }
     return null;
   };
 
+  const exportCSV = () => {
+    const headers = ['Code', 'Vehicle Model', 'Customer', 'Days', 'Total Amount', 'Payment Date'];
+    let totalAmount = 0;
+    const rows = filteredHistory.map(h => {
+      totalAmount += h.totalPaid || 0;
+      return [
+        h.rent?.vehicle?.vehicleCode || 'N/A',
+        h.rent?.vehicle?.vehicleModel || 'N/A',
+        h.rent?.customer?.customerName || 'N/A',
+        h.rent?.rentDays || 0,
+        formatCurrency(h.totalPaid),
+        h.payDate || 'N/A'
+      ];
+    });
+    
+    rows.push(['', '', '', 'Grand Total', formatCurrency(totalAmount), '']);
+
+    const csvContent = [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute('download', 'revenue_report.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportPDF = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.width;
+    
+    // 1. Header Area
+    // Company Logo / Name
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.setTextColor(31, 41, 55); // Gray-800
+    doc.text('VEHICLERENT', 14, 20);
+    
+    // Company Subtitle / Contact
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(107, 114, 128); // Gray-500
+    doc.text('123 Business Avenue, Enterprise City', 14, 26);
+    doc.text('Phone: +1 234 567 890 | Email: support@vehiclerent.com', 14, 31);
+    
+    // Report Title (Right Aligned)
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.setTextColor(31, 41, 55);
+    doc.text('FINANCIAL REPORT', pageWidth - 14, 20, { align: 'right' });
+    
+    // Date & Period
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.text(`Date Generated: ${new Date().toLocaleDateString()}`, pageWidth - 14, 26, { align: 'right' });
+    doc.text(`Period Filter: ${timeFilter}`, pageWidth - 14, 31, { align: 'right' });
+
+    // Separator Line
+    doc.setDrawColor(229, 231, 235); // Gray-200
+    doc.setLineWidth(0.5);
+    doc.line(14, 36, pageWidth - 14, 36);
+
+    const tableColumn = ['Code', 'Vehicle Model', 'Customer', 'Days', 'Total Amount', 'Payment Date'];
+    const tableRows = [];
+    let totalAmount = 0;
+
+    filteredHistory.forEach(h => {
+      const amount = h.totalPaid || 0;
+      totalAmount += amount;
+      const rowData = [
+        h.rent?.vehicle?.vehicleCode || 'N/A',
+        h.rent?.vehicle?.vehicleModel || 'N/A',
+        h.rent?.customer?.customerName || 'N/A',
+        h.rent?.rentDays || 0,
+        `$${formatCurrency(amount)}`,
+        h.payDate || 'N/A'
+      ];
+      tableRows.push(rowData);
+    });
+
+    tableRows.push([
+      { content: 'Grand Total', colSpan: 4, styles: { halign: 'right', fontStyle: 'bold', fillColor: [249, 250, 251] } },
+      { content: `$${formatCurrency(totalAmount)}`, styles: { fontStyle: 'bold', textColor: [22, 163, 74], fillColor: [249, 250, 251] } },
+      { content: '', styles: { fillColor: [249, 250, 251] } }
+    ]);
+
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 42,
+      theme: 'grid',
+      styles: { 
+        fontSize: 9,
+        font: 'helvetica',
+        cellPadding: 4,
+        lineColor: [229, 231, 235],
+        lineWidth: 0.1
+      },
+      headStyles: { 
+        fillColor: [31, 41, 55], // Dark gray header
+        textColor: 255,
+        fontStyle: 'bold' 
+      },
+      alternateRowStyles: {
+        fillColor: [249, 250, 251] // Very light gray alternating
+      },
+      didDrawPage: (data) => {
+        // Footer
+        const str = `Page ${doc.internal.getNumberOfPages()}`;
+        doc.setFontSize(8);
+        doc.setTextColor(156, 163, 175);
+        doc.text(str, pageWidth / 2, doc.internal.pageSize.height - 10, { align: 'center' });
+      }
+    });
+
+    doc.save('revenue_report.pdf');
+  };
+
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <h2 className="text-xl font-bold text-gray-900">Financial Statistics</h2>
-        <div className="flex gap-1 bg-gray-100 p-1 rounded-xl">
-          {[{ key: '7DAYS', label: '7D' }, { key: '30DAYS', label: '30D' }, { key: 'ALL', label: 'All Time' }].map(f => (
-            <button key={f.key} onClick={() => setTimeFilter(f.key)} className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${timeFilter === f.key ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}>
-              {f.label}
+        <div className="flex flex-wrap items-center gap-3">
+          {timeFilter === 'CUSTOM' && (
+            <div className="flex items-center gap-2">
+              <input type="date" value={customStart} onChange={e => setCustomStart(e.target.value)} className="px-2 py-1.5 border border-gray-300 rounded-lg text-xs" />
+              <span className="text-gray-400 text-xs">-</span>
+              <input type="date" value={customEnd} onChange={e => setCustomEnd(e.target.value)} className="px-2 py-1.5 border border-gray-300 rounded-lg text-xs" />
+            </div>
+          )}
+          <div className="flex gap-1 bg-gray-100 p-1 rounded-xl">
+            {[{ key: '7DAYS', label: '7D' }, { key: '30DAYS', label: '30D' }, { key: 'ALL', label: 'All Time' }, { key: 'CUSTOM', label: 'Custom' }].map(f => (
+              <button key={f.key} onClick={() => setTimeFilter(f.key)} className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${timeFilter === f.key ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}>
+                {f.label}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <button onClick={exportCSV} className="flex items-center gap-1.5 bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-xl text-xs font-semibold transition">
+              <HiOutlineDocumentDownload size={16} /> CSV
             </button>
-          ))}
+            <button onClick={exportPDF} className="flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-xl text-xs font-semibold transition">
+              <HiOutlineDocumentDownload size={16} /> PDF
+            </button>
+          </div>
         </div>
       </div>
 
@@ -120,8 +278,8 @@ const RevenueTab = ({ revenue, rentalHistory = [], isLoading }) => {
         </div>
       ) : (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <KPICard label="Total Revenue" value={`$${(typeof filteredRevenue === 'number' ? filteredRevenue : 0).toFixed(2)}`} icon={HiOutlineCurrencyDollar} color="blue" />
-          <KPICard label="Avg / Rental" value={`$${avgPerRental.toFixed(2)}`} icon={HiOutlineTrendingUp} color="green" />
+          <KPICard label="Total Revenue" value={`$${formatCurrency(filteredRevenue)}`} icon={HiOutlineCurrencyDollar} color="blue" />
+          <KPICard label="Avg / Rental" value={`$${formatCurrency(avgPerRental)}`} icon={HiOutlineTrendingUp} color="green" />
           <KPICard label="Completed" value={filteredHistory.length} icon={HiOutlineClipboardList} color="purple" />
           <KPICard label="Top Earner" value={topEarner} icon={HiOutlineTruck} color="amber" />
         </div>

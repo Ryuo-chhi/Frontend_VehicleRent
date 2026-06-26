@@ -1,8 +1,17 @@
 import { HiOutlinePlus, HiOutlineCheckCircle, HiOutlineXCircle, HiOutlineTrash, HiOutlinePencil, HiOutlineTruck } from "react-icons/hi";
 import EmptyState from "./EmptyState";
 import SkeletonRows from "./SkeletonRows";
+import useTable from "../../hooks/useTable";
+import Pagination from "./Pagination";
 
-const VehiclesTab = ({ vehicles, onAddVehicleClick, onEditVehicle, onDeleteVehicle, isLoading }) => {
+const VehiclesTab = ({ vehicles, onAddVehicleClick, onEditVehicle, onDeleteVehicle, isLoading, searchQuery }) => {
+  const { currentData, requestSort, SortIcon, currentPage, totalPages, goToPage, totalItems } = useTable({
+    data: vehicles,
+    searchQuery,
+    searchFields: ['vehicleCode', 'vehicleBrand', 'vehicleModel', 'vehicleClass', 'licencePlate'],
+    itemsPerPage: 10
+  });
+
   const totalVehicles = vehicles.length;
   const availableVehicles = vehicles.filter(v => v.available).length;
   const rentedVehicles = totalVehicles - availableVehicles;
@@ -33,12 +42,12 @@ const VehiclesTab = ({ vehicles, onAddVehicleClick, onEditVehicle, onDeleteVehic
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-55/50">
-            <th className="py-3 px-4">Code</th>
-            <th className="py-3 px-4">Brand / Model</th>
-            <th className="py-3 px-4">Class</th>
-            <th className="py-3 px-4 text-right">Rate/Day</th>
-            <th className="py-3 px-4">Licence Plate</th>
-            <th className="py-3 px-4">Status</th>
+            <th className="py-3 px-4 cursor-pointer hover:bg-gray-100" onClick={() => requestSort('vehicleCode')}>Code <SortIcon columnKey="vehicleCode" /></th>
+            <th className="py-3 px-4 cursor-pointer hover:bg-gray-100" onClick={() => requestSort('vehicleBrand')}>Brand / Model <SortIcon columnKey="vehicleBrand" /></th>
+            <th className="py-3 px-4 cursor-pointer hover:bg-gray-100" onClick={() => requestSort('vehicleClass')}>Class <SortIcon columnKey="vehicleClass" /></th>
+            <th className="py-3 px-4 text-right cursor-pointer hover:bg-gray-100" onClick={() => requestSort('rentalRatePerDay')}>Rate/Day <SortIcon columnKey="rentalRatePerDay" /></th>
+            <th className="py-3 px-4 cursor-pointer hover:bg-gray-100" onClick={() => requestSort('licencePlate')}>Licence Plate <SortIcon columnKey="licencePlate" /></th>
+            <th className="py-3 px-4 cursor-pointer hover:bg-gray-100" onClick={() => requestSort('available')}>Status <SortIcon columnKey="available" /></th>
             <th className="py-3 px-4 text-right">Actions</th>
           </tr>
         </thead>
@@ -57,8 +66,14 @@ const VehiclesTab = ({ vehicles, onAddVehicleClick, onEditVehicle, onDeleteVehic
                 />
               </td>
             </tr>
+          ) : currentData.length === 0 ? (
+            <tr>
+              <td colSpan="7" className="py-8 text-center text-gray-500">
+                No vehicles match your search.
+              </td>
+            </tr>
           ) : (
-            vehicles.map((v) => (
+            currentData.map((v) => (
               <tr key={v.vehicleId} className="hover:bg-gray-50 transition-colors">
                 <td className="py-3.5 px-4 font-mono font-semibold text-gray-900">{v.vehicleCode}</td>
                 <td className="py-3.5 px-4">
@@ -101,6 +116,9 @@ const VehiclesTab = ({ vehicles, onAddVehicleClick, onEditVehicle, onDeleteVehic
           )}
         </tbody>
       </table>
+      {!isLoading && currentData.length > 0 && (
+        <Pagination currentPage={currentPage} totalPages={totalPages} goToPage={goToPage} totalItems={totalItems} itemsPerPage={10} />
+      )}
     </div>
   </div>
   );

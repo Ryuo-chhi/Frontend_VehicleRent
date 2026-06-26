@@ -2,9 +2,25 @@ import { useState } from "react";
 import { HiOutlinePlus, HiDotsVertical, HiOutlineClipboardList } from "react-icons/hi";
 import EmptyState from "./EmptyState";
 import SkeletonRows from "./SkeletonRows";
+import useTable from "../../hooks/useTable";
+import Pagination from "./Pagination";
 
-const RentalsTab = ({ activeRentals, rentalHistory, onNewRentalClick, onReturnClick, onViewDetails, isLoading }) => {
+const RentalsTab = ({ activeRentals, rentalHistory, onNewRentalClick, onReturnClick, onViewDetails, isLoading, searchQuery }) => {
   const [view, setView] = useState('active');
+
+  const activeTable = useTable({
+    data: activeRentals,
+    searchQuery,
+    searchFields: ['rentId', 'vehicle.vehicleBrand', 'vehicle.vehicleModel', 'customer.customerName'],
+    itemsPerPage: 10
+  });
+
+  const historyTable = useTable({
+    data: rentalHistory,
+    searchQuery,
+    searchFields: ['rent.vehicle.vehicleCode', 'rent.vehicle.vehicleModel', 'rent.customer.customerName', 'totalPaid'],
+    itemsPerPage: 10
+  });
 
   return (
   <div>
@@ -48,12 +64,12 @@ const RentalsTab = ({ activeRentals, rentalHistory, onNewRentalClick, onReturnCl
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase bg-gray-55/50">
-              <th className="py-3 px-4">ID</th>
-              <th className="py-3 px-4">Vehicle</th>
-              <th className="py-3 px-4">Customer</th>
-              <th className="py-3 px-4">Start Date</th>
-              <th className="py-3 px-4 text-right">Days</th>
-              <th className="py-3 px-4 text-right">Deposit</th>
+              <th className="py-3 px-4 cursor-pointer hover:bg-gray-100" onClick={() => activeTable.requestSort('rentId')}>ID <activeTable.SortIcon columnKey="rentId" /></th>
+              <th className="py-3 px-4 cursor-pointer hover:bg-gray-100" onClick={() => activeTable.requestSort('vehicle.vehicleBrand')}>Vehicle <activeTable.SortIcon columnKey="vehicle.vehicleBrand" /></th>
+              <th className="py-3 px-4 cursor-pointer hover:bg-gray-100" onClick={() => activeTable.requestSort('customer.customerName')}>Customer <activeTable.SortIcon columnKey="customer.customerName" /></th>
+              <th className="py-3 px-4 cursor-pointer hover:bg-gray-100" onClick={() => activeTable.requestSort('startDate')}>Start Date <activeTable.SortIcon columnKey="startDate" /></th>
+              <th className="py-3 px-4 text-right cursor-pointer hover:bg-gray-100" onClick={() => activeTable.requestSort('rentDays')}>Days <activeTable.SortIcon columnKey="rentDays" /></th>
+              <th className="py-3 px-4 text-right cursor-pointer hover:bg-gray-100" onClick={() => activeTable.requestSort('payment.deposit')}>Deposit <activeTable.SortIcon columnKey="payment.deposit" /></th>
               <th className="py-3 px-4 text-right">Action</th>
             </tr>
           </thead>
@@ -72,8 +88,14 @@ const RentalsTab = ({ activeRentals, rentalHistory, onNewRentalClick, onReturnCl
                   />
                 </td>
               </tr>
+            ) : activeTable.currentData.length === 0 ? (
+              <tr>
+                <td colSpan="7" className="py-8 text-center text-gray-500">
+                  No active rentals match your search.
+                </td>
+              </tr>
             ) : (
-              activeRentals.map((r) => (
+              activeTable.currentData.map((r) => (
                 <tr key={r.rentId} className="hover:bg-gray-50 transition">
                   <td className="py-3.5 px-4 font-mono font-bold text-gray-900">#{r.rentId}</td>
                   <td className="py-3.5 px-4">
@@ -105,6 +127,9 @@ const RentalsTab = ({ activeRentals, rentalHistory, onNewRentalClick, onReturnCl
             )}
           </tbody>
         </table>
+        {!isLoading && activeTable.currentData.length > 0 && (
+          <Pagination currentPage={activeTable.currentPage} totalPages={activeTable.totalPages} goToPage={activeTable.goToPage} totalItems={activeTable.totalItems} itemsPerPage={10} />
+        )}
       </div>
     )}
 
@@ -114,12 +139,12 @@ const RentalsTab = ({ activeRentals, rentalHistory, onNewRentalClick, onReturnCl
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase bg-gray-55/50">
-              <th className="py-3 px-4">Code</th>
-              <th className="py-3 px-4">Vehicle Model</th>
-              <th className="py-3 px-4">Customer</th>
-              <th className="py-3 px-4 text-right">Days</th>
-              <th className="py-3 px-4 text-right">Total Amount</th>
-              <th className="py-3 px-4">Payment Date</th>
+              <th className="py-3 px-4 cursor-pointer hover:bg-gray-100" onClick={() => historyTable.requestSort('rent.vehicle.vehicleCode')}>Code <historyTable.SortIcon columnKey="rent.vehicle.vehicleCode" /></th>
+              <th className="py-3 px-4 cursor-pointer hover:bg-gray-100" onClick={() => historyTable.requestSort('rent.vehicle.vehicleModel')}>Vehicle Model <historyTable.SortIcon columnKey="rent.vehicle.vehicleModel" /></th>
+              <th className="py-3 px-4 cursor-pointer hover:bg-gray-100" onClick={() => historyTable.requestSort('rent.customer.customerName')}>Customer <historyTable.SortIcon columnKey="rent.customer.customerName" /></th>
+              <th className="py-3 px-4 text-right cursor-pointer hover:bg-gray-100" onClick={() => historyTable.requestSort('rent.rentDays')}>Days <historyTable.SortIcon columnKey="rent.rentDays" /></th>
+              <th className="py-3 px-4 text-right cursor-pointer hover:bg-gray-100" onClick={() => historyTable.requestSort('totalPaid')}>Total Amount <historyTable.SortIcon columnKey="totalPaid" /></th>
+              <th className="py-3 px-4 cursor-pointer hover:bg-gray-100" onClick={() => historyTable.requestSort('payDate')}>Payment Date <historyTable.SortIcon columnKey="payDate" /></th>
               <th className="py-3 px-4 text-right">Action</th>
             </tr>
           </thead>
@@ -136,8 +161,14 @@ const RentalsTab = ({ activeRentals, rentalHistory, onNewRentalClick, onReturnCl
                   />
                 </td>
               </tr>
+            ) : historyTable.currentData.length === 0 ? (
+              <tr>
+                <td colSpan="7" className="py-8 text-center text-gray-500">
+                  No rental history matches your search.
+                </td>
+              </tr>
             ) : (
-              rentalHistory.map((h, i) => (
+              historyTable.currentData.map((h, i) => (
                 <tr key={i} className="hover:bg-gray-50 transition">
                   <td className="py-3.5 px-4 font-mono">{h.rent?.vehicle?.vehicleCode}</td>
                   <td className="py-3.5 px-4">{h.rent?.vehicle?.vehicleModel}</td>
@@ -160,6 +191,9 @@ const RentalsTab = ({ activeRentals, rentalHistory, onNewRentalClick, onReturnCl
             )}
           </tbody>
         </table>
+        {!isLoading && historyTable.currentData.length > 0 && (
+          <Pagination currentPage={historyTable.currentPage} totalPages={historyTable.totalPages} goToPage={historyTable.goToPage} totalItems={historyTable.totalItems} itemsPerPage={10} />
+        )}
       </div>
     )}
   </div>

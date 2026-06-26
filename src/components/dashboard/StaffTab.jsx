@@ -1,8 +1,18 @@
 import { HiOutlineCheckCircle, HiOutlineXCircle, HiOutlineTrash, HiOutlinePencil, HiOutlinePlus, HiOutlineUsers } from "react-icons/hi";
 import EmptyState from "./EmptyState";
 import SkeletonRows from "./SkeletonRows";
+import useTable from "../../hooks/useTable";
+import Pagination from "./Pagination";
 
-const StaffTab = ({ staffList, onEditStaff, onDeleteStaff, onAddStaff, isLoading }) => (
+const StaffTab = ({ staffList, onEditStaff, onDeleteStaff, onAddStaff, isLoading, searchQuery }) => {
+  const { currentData, requestSort, SortIcon, currentPage, totalPages, goToPage, totalItems } = useTable({
+    data: staffList,
+    searchQuery,
+    searchFields: ['id', 'name', 'username', 'role'], // No password
+    itemsPerPage: 10
+  });
+
+  return (
   <div>
     <div className="flex justify-between items-center mb-6">
       <h2 className="text-xl font-bold text-gray-900">Staff Management</h2>
@@ -14,11 +24,11 @@ const StaffTab = ({ staffList, onEditStaff, onDeleteStaff, onAddStaff, isLoading
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase bg-gray-55/50">
-            <th className="py-3 px-4">ID</th>
-            <th className="py-3 px-4">Name</th>
-            <th className="py-3 px-4">Username</th>
-            <th className="py-3 px-4">Role</th>
-            <th className="py-3 px-4">Status</th>
+            <th className="py-3 px-4 cursor-pointer hover:bg-gray-100" onClick={() => requestSort('id')}>ID <SortIcon columnKey="id" /></th>
+            <th className="py-3 px-4 cursor-pointer hover:bg-gray-100" onClick={() => requestSort('name')}>Name <SortIcon columnKey="name" /></th>
+            <th className="py-3 px-4 cursor-pointer hover:bg-gray-100" onClick={() => requestSort('username')}>Username <SortIcon columnKey="username" /></th>
+            <th className="py-3 px-4 cursor-pointer hover:bg-gray-100" onClick={() => requestSort('role')}>Role <SortIcon columnKey="role" /></th>
+            <th className="py-3 px-4 cursor-pointer hover:bg-gray-100" onClick={() => requestSort('active')}>Status <SortIcon columnKey="active" /></th>
             <th className="py-3 px-4 text-right">Actions</th>
           </tr>
         </thead>
@@ -29,8 +39,12 @@ const StaffTab = ({ staffList, onEditStaff, onDeleteStaff, onAddStaff, isLoading
             <tr><td colSpan="6">
               <EmptyState icon={HiOutlineUsers} title="No staff members" description="Add your first team member to manage operations." actionLabel="Add Staff" onAction={onAddStaff} />
             </td></tr>
+          ) : currentData.length === 0 ? (
+            <tr><td colSpan="6" className="py-8 text-center text-gray-500">
+              No staff members match your search.
+            </td></tr>
           ) : (
-            staffList.map((s) => (
+            currentData.map((s) => (
               <tr key={s.id} className="hover:bg-gray-50 transition">
                 <td className="py-3.5 px-4 font-mono font-bold">#{s.id}</td>
                 <td className="py-3.5 px-4 font-semibold text-gray-900">{s.name}</td>
@@ -60,8 +74,12 @@ const StaffTab = ({ staffList, onEditStaff, onDeleteStaff, onAddStaff, isLoading
           )}
         </tbody>
       </table>
+      {!isLoading && currentData.length > 0 && (
+        <Pagination currentPage={currentPage} totalPages={totalPages} goToPage={goToPage} totalItems={totalItems} itemsPerPage={10} />
+      )}
     </div>
   </div>
-);
+  );
+};
 
 export default StaffTab;

@@ -1,8 +1,18 @@
 import { HiOutlineTrash, HiOutlinePencil, HiOutlinePlus, HiOutlineUserGroup } from "react-icons/hi";
 import EmptyState from "./EmptyState";
 import SkeletonRows from "./SkeletonRows";
+import useTable from "../../hooks/useTable";
+import Pagination from "./Pagination";
 
-const CustomersTab = ({ customers, onEditCustomer, onDeleteCustomer, onAddCustomer, isLoading }) => (
+const CustomersTab = ({ customers, onEditCustomer, onDeleteCustomer, onAddCustomer, isLoading, searchQuery }) => {
+  const { currentData, requestSort, SortIcon, currentPage, totalPages, goToPage, totalItems } = useTable({
+    data: customers,
+    searchQuery,
+    searchFields: ['customerName', 'email', 'customerPhone', 'customerIdNum'],
+    itemsPerPage: 10
+  });
+
+  return (
   <div>
     <div className="flex justify-between items-center mb-6">
       <h2 className="text-xl font-bold text-gray-900">Registered Customers</h2>
@@ -18,10 +28,10 @@ const CustomersTab = ({ customers, onEditCustomer, onDeleteCustomer, onAddCustom
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase bg-gray-55/50">
-            <th className="py-3 px-4">Name</th>
-            <th className="py-3 px-4">Email</th>
-            <th className="py-3 px-4">Phone Number</th>
-            <th className="py-3 px-4">ID Card/Passport</th>
+            <th className="py-3 px-4 cursor-pointer hover:bg-gray-100" onClick={() => requestSort('customerName')}>Name <SortIcon columnKey="customerName" /></th>
+            <th className="py-3 px-4 cursor-pointer hover:bg-gray-100" onClick={() => requestSort('email')}>Email <SortIcon columnKey="email" /></th>
+            <th className="py-3 px-4 cursor-pointer hover:bg-gray-100" onClick={() => requestSort('customerPhone')}>Phone Number <SortIcon columnKey="customerPhone" /></th>
+            <th className="py-3 px-4 cursor-pointer hover:bg-gray-100" onClick={() => requestSort('customerIdNum')}>ID Card/Passport <SortIcon columnKey="customerIdNum" /></th>
             <th className="py-3 px-4 text-right">Actions</th>
           </tr>
         </thead>
@@ -40,8 +50,14 @@ const CustomersTab = ({ customers, onEditCustomer, onDeleteCustomer, onAddCustom
                 />
               </td>
             </tr>
+          ) : currentData.length === 0 ? (
+            <tr>
+              <td colSpan="5" className="py-8 text-center text-gray-500">
+                No customers match your search.
+              </td>
+            </tr>
           ) : (
-            customers.map((c) => (
+            currentData.map((c) => (
               <tr key={c.customerId} className="hover:bg-gray-50 transition">
                 <td className="py-3.5 px-4 font-semibold text-gray-900">{c.customerName}</td>
                 <td className="py-3.5 px-4 text-gray-500">{c.email || '—'}</td>
@@ -70,8 +86,12 @@ const CustomersTab = ({ customers, onEditCustomer, onDeleteCustomer, onAddCustom
           )}
         </tbody>
       </table>
+      {!isLoading && currentData.length > 0 && (
+        <Pagination currentPage={currentPage} totalPages={totalPages} goToPage={goToPage} totalItems={totalItems} itemsPerPage={10} />
+      )}
     </div>
   </div>
-);
+  );
+};
 
 export default CustomersTab;

@@ -1,8 +1,18 @@
 import { HiOutlinePencil, HiOutlineTrash, HiOutlinePlus, HiOutlineCog } from "react-icons/hi";
 import EmptyState from "./EmptyState";
 import SkeletonRows from "./SkeletonRows";
+import useTable from "../../hooks/useTable";
+import Pagination from "./Pagination";
 
-const MaintenanceTab = ({ maintenanceRecords, onAddClick, onEditClick, onDeleteClick, isLoading }) => (
+const MaintenanceTab = ({ maintenanceRecords, onAddClick, onEditClick, onDeleteClick, isLoading, searchQuery }) => {
+  const { currentData, requestSort, SortIcon, currentPage, totalPages, goToPage, totalItems } = useTable({
+    data: maintenanceRecords,
+    searchQuery,
+    searchFields: ['maintenanceId', 'vehicleId', 'details', 'status'],
+    itemsPerPage: 10
+  });
+
+  return (
   <div>
     <div className="flex justify-between items-center mb-6">
       <h2 className="text-xl font-bold text-gray-900">Maintenance Records</h2>
@@ -14,13 +24,13 @@ const MaintenanceTab = ({ maintenanceRecords, onAddClick, onEditClick, onDeleteC
       <table className="w-full text-left border-collapse">
         <thead>
           <tr className="border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase bg-gray-55/50">
-            <th className="py-3 px-4">ID</th>
-            <th className="py-3 px-4">Vehicle ID</th>
-            <th className="py-3 px-4">Details</th>
-            <th className="py-3 px-4 text-right">Cost</th>
-            <th className="py-3 px-4">Start</th>
-            <th className="py-3 px-4">End</th>
-            <th className="py-3 px-4">Status</th>
+            <th className="py-3 px-4 cursor-pointer hover:bg-gray-100" onClick={() => requestSort('maintenanceId')}>ID <SortIcon columnKey="maintenanceId" /></th>
+            <th className="py-3 px-4 cursor-pointer hover:bg-gray-100" onClick={() => requestSort('vehicleId')}>Vehicle ID <SortIcon columnKey="vehicleId" /></th>
+            <th className="py-3 px-4 cursor-pointer hover:bg-gray-100" onClick={() => requestSort('details')}>Details <SortIcon columnKey="details" /></th>
+            <th className="py-3 px-4 text-right cursor-pointer hover:bg-gray-100" onClick={() => requestSort('cost')}>Cost <SortIcon columnKey="cost" /></th>
+            <th className="py-3 px-4 cursor-pointer hover:bg-gray-100" onClick={() => requestSort('startDate')}>Start <SortIcon columnKey="startDate" /></th>
+            <th className="py-3 px-4 cursor-pointer hover:bg-gray-100" onClick={() => requestSort('endDate')}>End <SortIcon columnKey="endDate" /></th>
+            <th className="py-3 px-4 cursor-pointer hover:bg-gray-100" onClick={() => requestSort('status')}>Status <SortIcon columnKey="status" /></th>
             <th className="py-3 px-4 text-right">Actions</th>
           </tr>
         </thead>
@@ -31,8 +41,12 @@ const MaintenanceTab = ({ maintenanceRecords, onAddClick, onEditClick, onDeleteC
             <tr><td colSpan="8">
               <EmptyState icon={HiOutlineCog} title="All clear!" description="No maintenance records. Your fleet is running smooth." actionLabel="New Record" onAction={onAddClick} />
             </td></tr>
+          ) : currentData.length === 0 ? (
+            <tr><td colSpan="8" className="py-8 text-center text-gray-500">
+              No maintenance records match your search.
+            </td></tr>
           ) : (
-            maintenanceRecords.map((m) => (
+            currentData.map((m) => (
               <tr key={m.maintenanceId} className="hover:bg-gray-50 transition">
                 <td className="py-3.5 px-4 font-mono font-bold">#{m.maintenanceId}</td>
                 <td className="py-3.5 px-4">{m.vehicleId}</td>
@@ -58,8 +72,12 @@ const MaintenanceTab = ({ maintenanceRecords, onAddClick, onEditClick, onDeleteC
           )}
         </tbody>
       </table>
+      {!isLoading && currentData.length > 0 && (
+        <Pagination currentPage={currentPage} totalPages={totalPages} goToPage={goToPage} totalItems={totalItems} itemsPerPage={10} />
+      )}
     </div>
   </div>
-);
+  );
+};
 
 export default MaintenanceTab;
